@@ -1,7 +1,7 @@
 #!/usr/bin/python
-# coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
-# (c) 2020, Tom Page <@Tompage1994>
+# Copyright: (c) 2020, Tom Page <@Tompage1994>
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from __future__ import absolute_import, division, print_function
@@ -9,21 +9,14 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 
-ANSIBLE_METADATA = {
-    "metadata_version": "1.1",
-    "status": ["preview"],
-    "supported_by": "community",
-}
-
-
 DOCUMENTATION = """
 ---
 module: ah_approval
-author: "Tom Page (@Tompage1994)"
-short_description: Approve a collection in Automation Hub.
+author:
+  - Tom Page (@Tompage1994)
+short_description: Approve a collection in Automation Hub
 description:
-    - Approve a collection in Automation Hub. See
-      U(https://www.ansible.com/) for an overview.
+    - Approve a collection in Automation Hub.
 options:
     namespace:
       description:
@@ -41,13 +34,13 @@ options:
       required: True
       type: str
 
-extends_documentation_fragment: galaxy.galaxy.auth
+extends_documentation_fragment: ansible.ah.auth
 """
 
 
 EXAMPLES = """
 - name: Approve namespace.collection_name:v1.0.0
-  galaxy.galaxy.ah_approval:
+  ansible.ah.ah_approval:
     namespace: namespace
     name: collection_name
     version: v1.0.0
