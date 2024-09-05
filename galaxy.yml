@@ -17,9 +17,9 @@ tags:
   - ansible
   - galaxy
   - automation
-repository: https://github.com/ansible-collections/ansible_ah
-homepage: https://github.com/ansible-collections/ansible_ah
-issues: https://github.com/ansible-collections/ansible_ah/issues
+repository: https://github.com/ansible-collections/ansible_hub
+homepage: https://github.com/ansible-collections/ansible_hub
+issues: https://github.com/ansible-collections/ansible_hub/issues
 build_ignore:
   - .gitignore
   - changelogs/.plugin-cache.yaml
