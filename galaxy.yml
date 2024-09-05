@@ -1,6 +1,6 @@
 ---
 namespace: ansible
-name: ah
+name: hub
 version: 1.0.0
 readme: README.md
 authors:
