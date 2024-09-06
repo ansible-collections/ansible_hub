@@ -85,32 +85,32 @@ Every voice is important. If you have something on your mind, create an issue or
 
 Before using this collection, you need to install it with the Ansible Galaxy command-line tool:
 ```bash
-ansible-galaxy collection install ansible.ah
+ansible-galaxy collection install ansible.hub
 ```
 
 You can also include it in a `requirements.yml` file and install it with `ansible-galaxy collection install -r requirements.yml`, using the format:
 ```yaml
 ---
 collections:
-  - name: ansible.ah
+  - name: ansible.hub
 ```
 
 Note that if you install the collection from Ansible Galaxy, it will not be upgraded automatically when you upgrade the `ansible` package. To upgrade the collection to the latest available version, run the following command:
 ```bash
-ansible-galaxy collection install ansible.ah --upgrade
+ansible-galaxy collection install ansible.hub --upgrade
 ```
 
 You can also install a specific version of the collection, for example, if you need to downgrade when something is broken in the latest version (please report an issue in this repository). Use the following syntax to install version `1.0.0`:
 
 ```bash
-ansible-galaxy collection install ansible.ah:==1.0.0
+ansible-galaxy collection install ansible.hub:==1.0.0
 ```
 
 See [using Ansible collections](https://docs.ansible.com/ansible/devel/user_guide/collections_using.html) for more details.
 
 ## Release notes
 
-See the [changelog](https://github.com/ansible-collections/ansible_ah/tree/main/CHANGELOG.rst).
+See the [changelog](https://github.com/ansible-collections/ansible_hub/tree/main/CHANGELOG.rst).
 
 ## Roadmap
 
