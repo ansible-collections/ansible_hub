@@ -61,7 +61,7 @@ jobs:
 # https://docs.ansible.com/ansible/latest/dev_guide/testing_sanity.html
 
   sanity:
-    name: Sanity (Ⓐ${{ matrix.ansible }})
+    name: Sanity (Ⓐ${{ matrix.ansible }}) - ${{ matrix.python }}
     strategy:
       matrix:
         ansible:
@@ -81,6 +81,11 @@ jobs:
           - stable-2.17
           - devel
         # - milestone
+        python:
+          - '3.8'
+          - '3.9'
+          - '3.10'
+          - '3.11'
     # Ansible-test on various stable branches does not yet work well with cgroups v2.
     # Since ubuntu-latest now uses Ubuntu 22.04, we need to fall back to the ubuntu-20.04
     # image for these stable branches. The list of branches where this is necessary will
@@ -101,6 +106,7 @@ jobs:
         with:
           ansible-core-version: ${{ matrix.ansible }}
           testing-type: sanity
+          target-python-version: ${{ matrix.python }}
           # OPTIONAL If your sanity tests require code
           # from other collections, install them like this
           # test-deps: >-
@@ -140,7 +146,6 @@ jobs:
           - stable-2.17
           - devel
         # - milestone
-
     steps:
       - name: >-
           Perform unit testing against
@@ -200,8 +205,6 @@ jobs:
           # consider dropping testing against EOL versions and versions you don't support.
           # ansible-core 2.15
           - ansible: stable-2.15
-            python: '2.7'
-          - ansible: stable-2.15
             python: '3.5'
           - ansible: stable-2.15
             python: '3.6'
@@ -216,8 +219,6 @@ jobs:
           - ansible: stable-2.15
             python: '3.11'
           # ansible-core 2.16
-          - ansible: stable-2.16
-            python: '2.7'
           - ansible: stable-2.16
             python: '3.6'
           - ansible: stable-2.16
