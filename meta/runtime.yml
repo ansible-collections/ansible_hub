@@ -6,4 +6,5 @@ action_groups:
   hub:
     - ah_approval
     - ah_collection
+    - ah_collection_upload
     - ah_namespace
