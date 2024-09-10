@@ -7,4 +7,5 @@ action_groups:
     - ah_approval
     - ah_collection
     - ah_collection_upload
+    - ah_ee_registry
     - ah_namespace
