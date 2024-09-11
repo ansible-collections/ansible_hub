@@ -9,4 +9,5 @@ action_groups:
     - ah_collection_upload
     - ah_ee_registry
     - ah_ee_registry_index
+    - ah_ee_registry_sync
     - ah_namespace
