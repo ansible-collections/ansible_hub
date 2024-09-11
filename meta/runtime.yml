@@ -11,3 +11,4 @@ action_groups:
     - ah_ee_registry_index
     - ah_ee_registry_sync
     - ah_namespace
+    - collection_repository
