@@ -21,3 +21,4 @@ action_groups:
     - collection_remote
     - collection_repository
     - collection_repository_sync
+    - group_roles
