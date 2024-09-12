@@ -14,6 +14,7 @@ action_groups:
     - ah_ee_repository
     - ah_ee_repository_sync
     - ah_namespace
+    - ah_role
     - collection_remote
     - collection_repository
     - collection_repository_sync
