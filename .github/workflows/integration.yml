@@ -82,3 +82,6 @@ jobs:
       - name: Stand up galaxy_ng
         working-directory: galaxy_ng
         run: python3 dev/oci_env_integration/actions/ci.py
+
+      - name: Run integration tests
+        run: ansible-test integration ah_namespace
