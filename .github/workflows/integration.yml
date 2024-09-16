@@ -1,0 +1,51 @@
+---
+name: Test integration tests with galaxy_ng
+
+on:
+    # Run CI against all pushes (direct commits, also merged PRs), Pull Requests
+    push:
+      branches:
+        - main
+        - stable-*
+    pull_request:
+    # Run CI once per day (at 06:00 UTC)
+    # This ensures that even if there haven't been commits that we are still testing against latest version of ansible-test for each ansible-base version
+    schedule:
+      - cron: '0 6 * * *'
+
+jobs:
+
+  integration:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        galaxy_ng_version:
+        #   - stable-4.8
+        #   - stable-4.9
+          - master
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Build and install the collection
+        id: build
+        uses: redhat-cop/ansible_collections_tooling/actions/build_ansible_collection@main
+        with:
+          collection_namespace: galaxy
+          collection_name: galaxy
+          collection_version: 1.0.0
+          collection_repo: https://github.com/ansible/galaxy_collection
+
+      - name: "Checkout galaxy_ng"
+        uses: actions/checkout@v2
+        with:
+          repository: ansible/galaxy_ng
+          path: galaxy_ng
+          ref: ${{ matrix.galaxy_ng_version }}
+
+      - name: (Linux) Install docker compose
+        run: |
+          curl -L -o /tmp/docker-compose https://github.com/docker/compose/releases/download/v2.29.1/docker-compose-linux-x86_64
+          install /tmp/docker-compose /usr/local/bin/
