@@ -83,5 +83,18 @@ jobs:
         working-directory: galaxy_ng
         run: python3 dev/oci_env_integration/actions/ci.py
 
-      - name: Run integration tests
+      - name: Create integration config
+        working-directory: /home/runner/collections/ansible_collections/ansible/hub/tests/integration/
+        run: |
+          echo "ah_host: 'http://localhost:55001/'" > integration_config.yml
+          echo "ah_username: admin" >> integration_config.yml
+          echo "ah_password: admin" >> integration_config.yml
+          echo "ah_verify_ssl: false" >> integration_config.yml
+
+      - name: Run integration test - ah_namespace
         run: ansible-test integration ah_namespace
+        working-directory: /home/runner/collections/ansible_collections/ansible/hub
+
+      - name: Run integration test - ah_build
+        run: ansible-test integration ah_build
+        working-directory: /home/runner/collections/ansible_collections/ansible/hub

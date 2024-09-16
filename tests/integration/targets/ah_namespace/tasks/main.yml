@@ -1,5 +1,11 @@
 ---
 - name: ah_namespace integration tests
+  module_defaults:
+    group/ansible.hub.hub:
+      ah_host: "{{ ah_host }}"
+      ah_username: "{{ ah_username }}"
+      ah_password: "{{ ah_password }}"
+      validate_certs: "{{ ah_verify_ssl }}"
   block:
     - name: Generate a test_id for the test
       set_fact:
@@ -45,4 +51,3 @@
         name: "{{ namespace }}"
         state: absent
       ignore_errors: true
-
