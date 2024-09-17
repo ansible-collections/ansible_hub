@@ -64,35 +64,7 @@
         that:
           - r.changed
 
-    - name: Delete a collection to the given collection
-      ansible.hub.ah_collection:
-        namespace: "{{ namespace }}"
-        name: "{{ collection_name }}"
-        version: 1.0.0
-        state: absent
-      register: r
-
-    - name: Check if the collection is deleted successfully
-      assert:
-        that:
-          - r.changed
-          - r.deleted
-
   always:
-    - name: Delete a collection to the given collection
-      ansible.hub.ah_collection:
-        namespace: "{{ namespace }}"
-        name: "{{ collection_name }}"
-        version: 1.0.0
-        state: absent
-      ignore_errors: true
-
-    - name: Delete namespace
-      ansible.hub.ah_namespace:
-        name: "{{ namespace }}"
-        state: absent
-      ignore_errors: true
-
     - name: Remove built collection
       ansible.builtin.file:
         path: "{{ build_path }}/sample-sample-1.0.0.tar.gz"
