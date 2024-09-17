@@ -122,3 +122,7 @@ jobs:
       - name: Run integration test - collection_repository_sync
         run: ansible-test integration collection_repository_sync
         working-directory: /home/runner/collections/ansible_collections/ansible/hub
+
+      - name: Run integration test - ah_ee_registry
+        run: ansible-test integration ah_ee_registry
+        working-directory: /home/runner/collections/ansible_collections/ansible/hub
