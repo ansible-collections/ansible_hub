@@ -21,8 +21,8 @@ jobs:
       fail-fast: false
       matrix:
         galaxy_ng_version:
-        #   - stable-4.8
-        #   - stable-4.9
+          #   - stable-4.8
+          #   - stable-4.9
           - master
     steps:
       - uses: actions/checkout@v2
@@ -97,4 +97,12 @@ jobs:
 
       - name: Run integration test - ah_build
         run: ansible-test integration ah_build
+        working-directory: /home/runner/collections/ansible_collections/ansible/hub
+
+      - name: Run integration test - ah_collection
+        run: ansible-test integration ah_collection
+        working-directory: /home/runner/collections/ansible_collections/ansible/hub
+
+      - name: Run integration test - ah_collection_upload
+        run: ansible-test integration ah_collection_upload
         working-directory: /home/runner/collections/ansible_collections/ansible/hub
