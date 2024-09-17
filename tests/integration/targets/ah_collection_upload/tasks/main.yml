@@ -40,6 +40,7 @@
       ansible.hub.ah_build:
         path: "{{ build_path }}/sample/sample"
         output_path: "{{ build_path }}/"
+        force: true
       register: r
 
     - name: Check if the file exists
@@ -52,17 +53,6 @@
         that:
           - r.changed
           - build_stat.stat.exists
-
-    - name: Create collection space
-      ansible.hub.ah_collection:
-        namespace: "{{ namespace }}"
-        name: "{{ collection_name }}"
-      register: r
-
-    - name: Check if the collection is created successfully
-      assert:
-        that:
-          - r.changed
 
     - name: Upload a collection to the given collection
       ansible.hub.ah_collection_upload:
@@ -100,5 +90,11 @@
     - name: Delete namespace
       ansible.hub.ah_namespace:
         name: "{{ namespace }}"
+        state: absent
+      ignore_errors: true
+
+    - name: Remove built collection
+      ansible.builtin.file:
+        path: "{{ build_path }}/sample-sample-1.0.0.tar.gz"
         state: absent
       ignore_errors: true

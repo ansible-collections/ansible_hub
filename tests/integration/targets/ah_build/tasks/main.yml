@@ -35,7 +35,7 @@
         path: "{{ build_path }}/sample/sample"
         output_path: "{{ build_path }}/"
       register: r
-      ignore_errors: yes
+      ignore_errors: true
 
     - name: Check if re-building the collection without force fails
       assert:

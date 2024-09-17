@@ -1,5 +1,5 @@
 ---
-- name: ah_collection integration tests
+- name: ah_approval integration tests
   module_defaults:
     group/ansible.hub.hub:
       ah_host: "{{ ah_host }}"
@@ -58,9 +58,22 @@
         namespace: "{{ namespace }}"
         name: "{{ collection_name }}"
         path: "{{ build_path }}/sample-sample-1.0.0.tar.gz"
+        auto_approve: false
       register: r
 
     - name: Check if the collection is uploaded successfully
+      assert:
+        that:
+          - r.changed
+
+    - name: Approve the collection
+      ansible.hub.ah_approval:
+        namespace: "{{ namespace }}"
+        name: "{{ collection_name }}"
+        version: 1.0.0
+      register: r
+
+    - name: Check if the collection is approved
       assert:
         that:
           - r.changed
