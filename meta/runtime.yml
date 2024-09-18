@@ -13,6 +13,7 @@ action_groups:
     - ah_ee_registry_sync
     - ah_ee_repository
     - ah_ee_repository_sync
+    - ah_group
     - ah_namespace
     - ah_role
     - ah_token
