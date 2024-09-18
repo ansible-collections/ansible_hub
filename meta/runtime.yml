@@ -16,6 +16,7 @@ action_groups:
     - ah_namespace
     - ah_role
     - ah_token
+    - ah_user
     - collection_remote
     - collection_repository
     - collection_repository_sync
