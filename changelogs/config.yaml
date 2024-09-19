@@ -27,6 +27,6 @@ sections:
   - Bugfixes
 - - known_issues
   - Known Issues
-title: CHANGE THIS IN changelogs/config.yaml!
+title: ansible.hub
 trivial_section_name: trivial
 use_fqcn: true
