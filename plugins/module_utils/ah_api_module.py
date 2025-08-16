@@ -19,6 +19,7 @@ import time
 from ansible.module_utils._text import to_bytes, to_text
 from ansible.module_utils.basic import AnsibleModule, env_fallback
 from ansible.module_utils.compat.version import LooseVersion as Version
+from ansible.module_utils.six import string_types
 from ansible.module_utils.six.moves.urllib.error import HTTPError
 from ansible.module_utils.six.moves.urllib.parse import urlencode, urlparse
 from ansible.module_utils.urls import Request, SSLValidationError
@@ -69,6 +70,13 @@ class AHAPIModule(AnsibleModule):
             required=False,
             fallback=(env_fallback, ["AH_VERIFY_SSL", "AAP_VALIDATE_CERTS"]),
         ),
+        ah_token=dict(
+            type="raw",
+            no_log=False,
+            aliases=["aap_token"],
+            required=False,
+            fallback=(env_fallback, ["AH_API_TOKEN", "AAP_TOKEN"]),
+        ),
         request_timeout=dict(
             type="float",
             aliases=["aap_request_timeout"],
@@ -90,8 +98,10 @@ class AHAPIModule(AnsibleModule):
     password = None
     verify_ssl = True
     request_timeout = 10
+    oauth_token = None
     path_prefix = "galaxy"
     authenticated = False
+    behind_resource_server = False
 
     def __init__(self, argument_spec, direct_params=None, **kwargs):
         """Initialize the object."""
@@ -134,6 +144,20 @@ class AHAPIModule(AnsibleModule):
             "Accept": "application/json",
         }
         self.session = Request(validate_certs=self.verify_ssl, headers=self.headers, follow_redirects=True, timeout=self.request_timeout)
+
+        # Perform magic depending on whether ah_token is a string or a dict
+        if self.params.get("ah_token"):
+            token_param = self.params.get("ah_token")
+            if isinstance(token_param, dict):
+                if "token" in token_param:
+                    self.oauth_token = self.params.get("ah_token")["token"]
+                else:
+                    self.fail_json(msg="The provided dict in ah_token did not properly contain the token entry")
+            elif isinstance(token_param, string_types):
+                self.oauth_token = self.params.get("ah_token")
+            else:
+                error_msg = "The provided ah_token type was not valid ({0}). Valid options are str or dict.".format(type(token_param).__name__)
+                self.fail_json(msg=error_msg)
 
         # Define the API paths
         self.galaxy_path_prefix = self.get_galaxy_path_prefix()
@@ -248,7 +272,14 @@ class AHAPIModule(AnsibleModule):
                 raise AHAPIModuleError("Invalid authentication credentials for {path} (HTTP 401).".format(path=url.path))
             # Sanity check: Did we get a forbidden response, which means that the user isn't allowed to do this? Report that.
             if he.code == 403:
-                raise AHAPIModuleError("You do not have permission to {method} {path} (HTTP 403).".format(method=method, path=url.path))
+                raise AHAPIModuleError(
+                    "You do not have permission to {method} {path} (HTTP 403).  gateway: {gateway}".format(
+                        method=method, path=url.path, gateway=self.make_request_raw_reponse(
+                            method="GET",
+                            url=self.host_url,
+                        )
+                    )
+                )
             # Sanity check: Did we get a 404 response?
             # Requests with primary keys will return a 404 if there is no response, and we want to consistently trap these.
             if he.code == 404:
@@ -391,16 +422,43 @@ class AHAPIModule(AnsibleModule):
 
     def authenticate(self):
         """Authenticate with the API."""
-        # Use basic auth
-        test_url = self.build_ui_url("me")
-        basic_str = base64.b64encode("{0}:{1}".format(self.username, self.password).encode("ascii"))
-        header = {"Authorization": "Basic {0}".format(basic_str.decode("ascii"))}
+
+        url = self.build_ui_url("auth/login")
         try:
-            self.make_request_raw_reponse("GET", test_url, headers=header)
-            self.headers.update(header)
+            response = self.make_request_raw_reponse("GET", url)
         except AHAPIModuleError as e:
             self.fail_json(msg="Authentication error: {error}".format(error=e))
-        self.authenticated = True
+
+        # Extract CSRF token from Set-Cookie header
+        csrf_token = None
+        for h in response.getheaders():
+            if h[0].lower() == "set-cookie":
+                k, v = h[1].split("=", 1)
+                if k.lower() == "csrftoken":
+                    csrf_token = v.split(";", 1)[0]
+                    break
+
+        header = {}
+        if csrf_token:
+            header = {"X-CSRFToken": csrf_token, "Cookie": f"csrftoken={csrf_token}"}
+
+        if self.oauth_token:
+            try:
+                # For token authentication, use Authorization header with CSRF
+                header.update({"Authorization": "Token {0}".format(self.oauth_token)})
+                self.session.headers.update(header)
+                self.authenticated = True
+            except AHAPIModuleError as e:
+                self.fail_json(msg="Authentication with token error: {error}".format(error=e))
+        elif self.username and self.password:
+            try:
+                basic_str = base64.b64encode("{0}:{1}".format(self.username, self.password).encode("ascii"))
+                header.update({"Authorization": "Basic {0}".format(basic_str.decode("ascii"))})
+                self.session.headers.update(header)
+                self.make_request("GET", url)
+                self.authenticated = True
+            except AHAPIModuleError as e:
+                self.fail_json(msg="Authentication error: {error}".format(error=e))
 
     def getFileContent(self, path):
         try:
@@ -459,6 +517,7 @@ class AHAPIModule(AnsibleModule):
             # No exception this is behind rescource_provider
             try:
                 rs_prefix = response["json"]["apis"]["galaxy"]
+                self.behind_resource_server = True
                 return rs_prefix.strip("/")
             except KeyError as e:
                 self.fail_json(msg="Error while getting Galaxy api path prefix: {error}".format(error=e))
