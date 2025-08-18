@@ -4,6 +4,14 @@ ansible.hub Release Notes
 
 .. contents:: Topics
 
+v1.0.1
+======
+
+Minor Changes
+-------------
+
+- added additional options for authentication to match controller credential type updates.
+
 v1.0.0
 ======
 

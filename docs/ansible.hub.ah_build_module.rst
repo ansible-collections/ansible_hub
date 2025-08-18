@@ -1,4 +1,4 @@
-.. Created with antsibull-docs 2.14.0
+.. Created with antsibull-docs 2.21.0
 
 ansible.hub.ah_build module -- Build a collection tar
 +++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -121,7 +121,6 @@ Authors
 ~~~~~~~
 
 - Tom Page (@Tompage1994)
-
 
 
 Collection links
