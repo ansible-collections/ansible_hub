@@ -6,3 +6,11 @@ releases:
     fragments:
     - release.yml
     release_date: '2024-09-23'
+  1.0.1:
+    changes:
+      minor_changes:
+      - added additional options for authentication to match controller credential
+        type updates.
+    fragments:
+    - argument_vars.yml
+    release_date: '2025-08-18'
