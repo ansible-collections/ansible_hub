@@ -1,5 +1,5 @@
 ---
-- name: ah_approval integration tests
+- name: ah_approval integration tests using basic auth
   module_defaults:
     group/ansible.hub.hub:
       ah_host: "{{ ah_host }}"

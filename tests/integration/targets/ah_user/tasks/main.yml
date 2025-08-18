@@ -1,5 +1,5 @@
 ---
-- name: ah_user integration tests
+- name: ah_user integration tests with basic auth
   module_defaults:
     group/ansible.hub.hub:
       ah_host: "{{ ah_host }}"
@@ -11,26 +11,24 @@
       set_fact:
         test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') | lower }}"
       when: test_id is not defined
-
-    - name: Ensure the user exists
+    - name: Ensure the user exists (basic auth)
       ansible.hub.ah_user:
-        username: "user_{{ test_id }}"
-        first_name: "first_{{ test_id }}"
-        last_name: "last_{{ test_id }}"
-        email: "user_{{ test_id }}@example.com"
+        username: "user_basic_{{ test_id }}"
+        first_name: "first_basic_{{ test_id }}"
+        last_name: "last_basic_{{ test_id }}"
+        email: "user_basic_{{ test_id }}@example.com"
         password: vs9mrD55NP
         state: present
-      register: r
+      register: r_basic
 
-    - name: Check if the user is created
+    - name: Check if the user is created (basic auth)
       assert:
         that:
-          - r.changed
+          - r_basic.changed
 
   always:
-    - name: Remove user
+    - name: Remove user (basic auth)
       ansible.hub.ah_user:
-        username: "user_{{ test_id }}"
+        username: "user_basic_{{ test_id }}"
         state: absent
-      register: r
       ignore_errors: true
