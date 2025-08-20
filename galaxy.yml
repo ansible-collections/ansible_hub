@@ -21,8 +21,11 @@ repository: https://github.com/ansible-collections/ansible_hub
 homepage: https://github.com/ansible-collections/ansible_hub
 issues: https://github.com/ansible-collections/ansible_hub/issues
 build_ignore:
+  - .ansible/
   - .gitignore
-  - changelogs/.plugin-cache.yaml
+  - .github/
+  - changelogs/
+  - scripts/
   - tools
   - setup.cfg
   - galaxy.yml.j2
