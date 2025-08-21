@@ -42,11 +42,17 @@ See [Managing automation content](https://docs.redhat.com/en/documentation/red_h
 Automate the upload, approval, and management of collections in your Automation Hub:
 
 ```yaml
-- name: Upload collection to hub
+- name: Create namespace
+  ansible.hub.ah_namespace:
+    name: "organization"
+    description: "Collections for my organization"
+    state: present
+
+- name: Upload collection to Hub
   ansible.hub.ah_collection:
-    name: "my_namespace.my_collection"
-    version: "1.0.0"
-    path: "/path/to/collection.tar.gz"
+    namespace: "organization"
+    name: "collection"
+    path: "/path/to/organization-collection.tar.gz"
     state: present
 ```
 
@@ -54,17 +60,14 @@ Automate the upload, approval, and management of collections in your Automation 
 Manage users and groups across your Automation Hub instance:
 
 ```yaml
-- name: Create user group
+- name: Create group
   ansible.hub.ah_group:
     name: "developers"
-    permissions:
-      - "galaxy.add_collection"
-      - "galaxy.change_collection"
     state: present
 ```
 
 
-### 4. Namespace Configuration
+### 3. Namespace Configuration
 Configure and manage namespaces for collection organization:
 
 ```yaml
@@ -75,30 +78,17 @@ Configure and manage namespaces for collection organization:
     state: present
 ```
 
-### 5. Token Management
+### 4. Token Management
 Manage API tokens for automation workflows:
 
 ```yaml
 - name: Create API token
   ansible.hub.ah_token:
-    description: "CI/CD Pipeline Token"
-    scope: "write"
+    ah_username: "admin"
+    ah_password: "admin"
     state: present
-```
-
-## Testing
-
-This collection includes comprehensive tests. To run tests locally:
-
-```bash
-# Install test dependencies
-pip install -r requirements-test.txt
-
-# Run unit tests
-pytest tests/unit/
-
-# Run integration tests (requires running Hub instance)
-pytest tests/integration/
+  register: ah_token
+  no_log: false
 ```
 
 ## Contributing
