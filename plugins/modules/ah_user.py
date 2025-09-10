@@ -185,9 +185,9 @@ def main():
     vers = module.get_server_version()
     user = AHUIUser(module)
 
-    if vers >= "4.10" and module.behind_resource_server:
+    if vers <= "4.10" and module.behind_resource_server:
         module.fail_json(
-            msg=f"Module incompatible with server version 4.10 or later, server version is {vers}"
+            msg=f"Module compatible with server version 4.10 or earlier, server version is {vers}"
         )
 
     # Get the user details from its name.
