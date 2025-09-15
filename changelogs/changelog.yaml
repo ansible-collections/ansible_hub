@@ -14,3 +14,11 @@ releases:
     fragments:
     - argument_vars.yml
     release_date: '2025-08-18'
+  1.0.2:
+    changes:
+      bugfixes:
+      - Fixed an issue where an incompatibility message was indicating the incorrect
+        version.
+    fragments:
+    - fix-error-msg.yml
+    release_date: '2025-09-11'
