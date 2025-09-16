@@ -82,7 +82,7 @@ EXAMPLES = r"""
     ah_host: hub.example.com
     ah_username: admin
     ah_password: Sup3r53cr3t
-  no_log: True
+  no_log: true
 
 - name: Ensure the administrators have all the permissions
   ansible.hub.ah_role:
@@ -92,7 +92,7 @@ EXAMPLES = r"""
     ah_host: hub.example.com
     ah_username: admin
     ah_password: Sup3r53cr3t
-  no_log: True
+  no_log: true
 
 - name: Ensure the developers cannot manage groups nor users
   ansible.hub.ah_role:
@@ -108,7 +108,7 @@ EXAMPLES = r"""
     ah_host: hub.example.com
     ah_username: admin
     ah_password: Sup3r53cr3t
-  no_log: True
+  no_log: true
 """
 
 RETURN = r""" # """

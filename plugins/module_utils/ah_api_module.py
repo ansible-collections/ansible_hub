@@ -72,7 +72,7 @@ class AHAPIModule(AnsibleModule):
         ),
         ah_token=dict(
             type="raw",
-            no_log=False,
+            no_log=True,
             aliases=["aap_token"],
             required=False,
             fallback=(env_fallback, ["AH_API_TOKEN", "AAP_TOKEN"]),

@@ -92,7 +92,7 @@ EXAMPLES = r"""
     ah_host: hub.example.com
     ah_username: admin
     ah_password: Sup3r53cr3t
-  no_log: True
+  no_log: true
 
 - name: Ensure the repository README is set
   ansible.hub.ah_ee_repository:
@@ -102,7 +102,7 @@ EXAMPLES = r"""
     ah_host: hub.example.com
     ah_username: admin
     ah_password: Sup3r53cr3t
-  no_log: True
+  no_log: true
 
 - name: Ensure the repository is removed
   ansible.hub.ah_ee_repository:
@@ -111,7 +111,7 @@ EXAMPLES = r"""
     ah_host: hub.example.com
     ah_username: admin
     ah_password: Sup3r53cr3t
-  no_log: True
+  no_log: true
 
 - name: Add a remote repository from quayio registry
   ansible.hub.ah_ee_repository:
@@ -125,7 +125,7 @@ EXAMPLES = r"""
     ah_host: hub.example.com
     ah_username: admin
     ah_password: Sup3r53cr3t
-  no_log: True
+  no_log: true
 """
 
 RETURN = r""" # """

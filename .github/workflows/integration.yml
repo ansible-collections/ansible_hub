@@ -4,193 +4,195 @@ name: Test integration tests with galaxy_ng
 on:
     # Run CI against all pushes (direct commits, also merged PRs), Pull Requests
     push:
-      branches:
-        - main
-        - stable-*
+        branches:
+            - main
+            - stable-*
     pull_request:
     workflow_dispatch:
     # Run CI once per day (at 06:00 UTC)
     # This ensures that even if there haven't been commits that we are still testing against latest version of ansible-test for each ansible-base version
     schedule:
-      - cron: '0 6 * * *'
+        - cron: '0 6 * * *'
 env:
-  PY_COLORS: '1'
-  ANSIBLE_FORCE_COLOR: '1'
+    PY_COLORS: '1'
+    ANSIBLE_FORCE_COLOR: '1'
 
 jobs:
 
-  integration:
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        galaxy_ng_version:
-          #   - stable-4.8
-          #   - stable-4.9
-          - master
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+    integration:
+        runs-on: ubuntu-latest
+        strategy:
+            fail-fast: false
+            matrix:
+                galaxy_ng_version:
+                    #   - stable-4.8
+                    #   - stable-4.9
+                    - master
+        steps:
+            - uses: actions/checkout@v2
+              with:
+                  ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
-      - name: Build and install the collection
-        id: build
-        uses: redhat-cop/ansible_collections_tooling/actions/build_ansible_collection@main
-        with:
-          collection_namespace: ansible
-          collection_name: hub
-          collection_version: 1.0.0
-          collection_repo: https://github.com/ansible-collections/ansible_hub
+            - name: Build and install the collection
+              id: build
+              uses: redhat-cop/ansible_collections_tooling/actions/build_ansible_collection@main
+              with:
+                  collection_namespace: ansible
+                  collection_name: hub
+                  collection_version: 1.0.0
+                  collection_repo: https://github.com/ansible-collections/ansible_hub
 
-      - name: "Checkout galaxy_ng"
-        uses: actions/checkout@v2
-        with:
-          repository: ansible/galaxy_ng
-          path: galaxy_ng
-          ref: ${{ matrix.galaxy_ng_version }}
+            - name: "Checkout galaxy_ng"
+              uses: actions/checkout@v2
+              with:
+                  repository: ansible/galaxy_ng
+                  path: galaxy_ng
+                  ref: ${{ matrix.galaxy_ng_version }}
 
-      - name: Setup python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.11"
+            - name: Setup python
+              uses: actions/setup-python@v4
+              with:
+                  python-version: "3.11"
 
-      - name: (Linux) Install docker compose
-        run: |
-          curl -L -o /tmp/docker-compose https://github.com/docker/compose/releases/download/v2.29.1/docker-compose-linux-x86_64
-          install /tmp/docker-compose /usr/local/bin/
+            - name: (Linux) Install docker compose
+              run: |
+                curl -L -o /tmp/docker-compose https://github.com/docker/compose/releases/download/v2.29.1/docker-compose-linux-x86_64
+                install /tmp/docker-compose /usr/local/bin/
 
-      - name: Set environment variables
-        working-directory: galaxy_ng
-        run: |
-          echo "COMPOSE_INTERACTIVE_NO_CLI=1" >> $GITHUB_ENV
-          echo "GH_DUMP_LOGS=1" >> $GITHUB_ENV
-          echo "GH_TEARDOWN=0" >> $GITHUB_ENV
-          echo "AH_HOST=http://localhost:5001/" >> $GITHUB_ENV
-          echo "AH_USERNAME=admin" >> $GITHUB_ENV
-          echo "AH_PASSWORD=admin" >> $GITHUB_ENV
+            - name: Set environment variables
+              working-directory: galaxy_ng
+              run: |
+                echo "COMPOSE_INTERACTIVE_NO_CLI=1" >> $GITHUB_ENV
+                echo "GH_DUMP_LOGS=1" >> $GITHUB_ENV
+                echo "GH_TEARDOWN=0" >> $GITHUB_ENV
+                echo "AH_HOST=http://localhost:5001/" >> $GITHUB_ENV
+                echo "AH_USERNAME=admin" >> $GITHUB_ENV
+                echo "AH_PASSWORD=admin" >> $GITHUB_ENV
 
-      - name: Update apt
-        run: sudo apt -y update
+            - name: Update apt
+              run: sudo apt -y update
 
-      - name: Install LDAP requirements
-        run: sudo apt-get install -y libsasl2-dev libssl-dev build-essential
+            - name: Install LDAP requirements
+              run: sudo apt-get install -y libsasl2-dev libssl-dev build-essential
 
-      - name: Spin up dev/compose/standalone.yaml
-        working-directory: galaxy_ng
-        run: |
-          USER_ID=$(id --user) docker compose -f dev/compose/standalone.yaml up --detach
+            - name: Spin up dev/compose/standalone.yaml
+              working-directory: galaxy_ng
+              run: |
+                USER_ID=$(id --user) docker compose -f dev/compose/standalone.yaml up --detach
 
-      - name: Export environment variables to host
-        working-directory: galaxy_ng
-        run: |
-          docker compose -f dev/compose/standalone.yaml exec manager /bin/bash -c 'env | grep -v -w "HOME"' >> $GITHUB_ENV
+            - name: Export environment variables to host
+              working-directory: galaxy_ng
+              run: |
+                docker compose -f dev/compose/standalone.yaml exec manager /bin/bash -c 'env | grep -v -w "HOME"' >> $GITHUB_ENV
 
-      - name: Wait for API online status
-        run: |
-          max_runs=10
-          for i in $(seq 1 $max_runs); do
-            echo "$i: checking api status..."
-            RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -u "${{ env.DJANGO_SUPERUSER_USERNAME }}:${{ env.DJANGO_SUPERUSER_PASSWORD }}" -LI http://localhost:5001${{ env.PULP_GALAXY_API_PATH_PREFIX }}pulp/api/v3/status/)
-            echo "$RESPONSE"
-            if [ "$RESPONSE" -ne 200 ]; then
-              echo "API is down. Retrying in 10 seconds..."
-              sleep 10
-            else
-              echo "API online."
-              exit 0
-            fi
+            - name: Wait for API online status
+              run: |
+                max_runs=10
+                for i in $(seq 1 $max_runs); do
+                  echo "$i: checking api status..."
+                  RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -u "${{ env.DJANGO_SUPERUSER_USERNAME }}:${{ env.DJANGO_SUPERUSER_PASSWORD }}" -LI \
+                  http://localhost:5001${{ env.PULP_GALAXY_API_PATH_PREFIX }}pulp/api/v3/status/)
+                  echo "$RESPONSE"
+                  if [ "$RESPONSE" -ne 200 ]; then
+                    echo "API is down. Retrying in 10 seconds..."
+                    sleep 10
+                  else
+                    echo "API online."
+                    exit 0
+                  fi
 
-            if [ $i -eq $max_runs ]; then
-              echo "Failed to start API after $max_runs retries."
-              exit 1
-            fi
-          done
+                  if [ $i -eq $max_runs ]; then
+                    echo "Failed to start API after $max_runs retries."
+                    exit 1
+                  fi
+                done
 
-      - name: Create integration config
-        working-directory: /home/runner/.ansible/collections/ansible_collections/ansible/hub/tests/integration/
-        run: |
-          echo "ah_host: 'http://localhost:5001/'" > integration_config.yml
-          echo "ah_username: admin" >> integration_config.yml
-          echo "ah_password: admin" >> integration_config.yml
-          echo "ah_verify_ssl: false" >> integration_config.yml
+            - name: Create integration config
+              working-directory: /home/runner/.ansible/collections/ansible_collections/ansible/hub/tests/integration/
+              run: |
+                echo "ah_host: 'http://localhost:5001/'" > integration_config.yml
+                echo "ah_username: admin" >> integration_config.yml
+                echo "ah_password: admin" >> integration_config.yml
+                echo "ah_verify_ssl: false" >> integration_config.yml
 
-      - name: Install ansible
-        run: |
-          pip3 install ansible
-          ansible --version
-          ansible-test --version
+            - name: Install ansible
+              run: |
+                pip3 install ansible
+                ansible --version
+                ansible-test --version
 
-      - name: Run integration test - ah_namespace
-        run: ansible-test integration -vvv --color yes ah_namespace
-        working-directory: /home/runner/.ansible/collections/ansible_collections/ansible/hub
+            - name: Run integration test - ah_namespace
+              run: ansible-test integration -vvv --color yes ah_namespace
+              working-directory: /home/runner/.ansible/collections/ansible_collections/ansible/hub
 
-      - name: Run integration test - ah_build
-        run: ansible-test integration -vvv --color yes ah_build
-        working-directory: /home/runner/.ansible/collections/ansible_collections/ansible/hub
+            - name: Run integration test - ah_build
+              run: ansible-test integration -vvv --color yes ah_build
+              working-directory: /home/runner/.ansible/collections/ansible_collections/ansible/hub
 
-      - name: Run integration test - ah_approval
-        run: ansible-test integration -vvv --color yes ah_approval
-        working-directory: /home/runner/.ansible/collections/ansible_collections/ansible/hub
+            - name: Run integration test - ah_approval
+              run: ansible-test integration -vvv --color yes ah_approval
+              working-directory: /home/runner/.ansible/collections/ansible_collections/ansible/hub
 
-      - name: Run integration test - ah_collection
-        run: ansible-test integration -vvv --color yes ah_collection
-        working-directory: /home/runner/.ansible/collections/ansible_collections/ansible/hub
+            - name: Run integration test - ah_collection
+              run: ansible-test integration -vvv --color yes ah_collection
+              working-directory: /home/runner/.ansible/collections/ansible_collections/ansible/hub
 
-      - name: Run integration test - ah_collection_upload
-        run: ansible-test integration -vvv --color yes ah_collection_upload
-        working-directory: /home/runner/.ansible/collections/ansible_collections/ansible/hub
+            - name: Run integration test - ah_collection_upload
+              run: ansible-test integration -vvv --color yes ah_collection_upload
+              working-directory: /home/runner/.ansible/collections/ansible_collections/ansible/hub
 
-      - name: Run integration test - collection_remote
-        run: ansible-test integration -vvv --color yes collection_remote
-        working-directory: /home/runner/.ansible/collections/ansible_collections/ansible/hub
+            - name: Run integration test - collection_remote
+              run: ansible-test integration -vvv --color yes collection_remote
+              working-directory: /home/runner/.ansible/collections/ansible_collections/ansible/hub
 
-      - name: Run integration test - collection_repository
-        run: ansible-test integration -vvv --color yes collection_repository
-        working-directory: /home/runner/.ansible/collections/ansible_collections/ansible/hub
+            - name: Run integration test - collection_repository
+              run: ansible-test integration -vvv --color yes collection_repository
+              working-directory: /home/runner/.ansible/collections/ansible_collections/ansible/hub
 
-      - name: Run integration test - collection_repository_sync
-        run: ansible-test integration -vvv --color yes collection_repository_sync
-        working-directory: /home/runner/.ansible/collections/ansible_collections/ansible/hub
+            - name: Run integration test - collection_repository_sync
+              run: ansible-test integration -vvv --color yes collection_repository_sync
+              working-directory: /home/runner/.ansible/collections/ansible_collections/ansible/hub
 
-      - name: Run integration test - ah_ee_registry
-        run: ansible-test integration -vvv --color yes ah_ee_registry
-        working-directory: /home/runner/.ansible/collections/ansible_collections/ansible/hub
+            - name: Run integration test - ah_ee_registry
+              run: ansible-test integration -vvv --color yes ah_ee_registry
+              working-directory: /home/runner/.ansible/collections/ansible_collections/ansible/hub
 
-      - name: Run integration test - ah_ee_repository
-        run: ansible-test integration -vvv --color yes ah_ee_repository
-        working-directory: /home/runner/.ansible/collections/ansible_collections/ansible/hub
+            - name: Run integration test - ah_ee_repository
+              run: ansible-test integration -vvv --color yes ah_ee_repository
+              working-directory: /home/runner/.ansible/collections/ansible_collections/ansible/hub
 
-      - name: Run integration test - ah_ee_repository_sync
-        run: ansible-test integration -vvv --color yes ah_ee_repository_sync
-        working-directory: /home/runner/.ansible/collections/ansible_collections/ansible/hub
+            - name: Run integration test - ah_ee_repository_sync
+              run: ansible-test integration -vvv --color yes ah_ee_repository_sync
+              working-directory: /home/runner/.ansible/collections/ansible_collections/ansible/hub
 
-      - name: Run integration test - ah_token
-        run: ansible-test integration -vvv --color yes ah_token
-        working-directory: /home/runner/.ansible/collections/ansible_collections/ansible/hub
+            - name: Run integration test - ah_token
+              run: ansible-test integration -vvv --color yes ah_token
+              working-directory: /home/runner/.ansible/collections/ansible_collections/ansible/hub
 
-      - name: Run integration test - ah_user
-        run: ansible-test integration -vvv --color yes ah_user
-        working-directory: /home/runner/.ansible/collections/ansible_collections/ansible/hub
+            - name: Run integration test - ah_user
+              run: ansible-test integration -vvv --color yes ah_user
+              working-directory: /home/runner/.ansible/collections/ansible_collections/ansible/hub
 
 
-      - name: Logs
-        if: always()
-        run: |
-          set +e
-          docker ps -a
-          echo ::group::MANAGER_LOGS
-          docker logs --tail=10000 compose-manager-1
-          echo ::endgroup::
-          echo ::group::WORKER_LOGS
-          docker logs --tail=10000 compose-worker-1
-          echo ::endgroup::
-          echo ::group::CONTENT_LOGS
-          docker logs --tail=10000 compose-content-1
-          echo ::endgroup::
-          echo ::group::API_LOGS
-          docker logs --tail=10000 compose-api-1
-          echo ::endgroup::
-          echo ::group::DEPENDENCIES
-          docker exec compose-manager-1 bash -c "pip list && pip install pipdeptree && pipdeptree"
-          echo ::endgroup::
-          curl -u "${{ env.DJANGO_SUPERUSER_USERNAME }}:${{ env.DJANGO_SUPERUSER_PASSWORD }}" -L http://localhost:5001${{ env.PULP_GALAXY_API_PATH_PREFIX }}pulp/api/v3/status/ | jq || true
+            - name: Logs
+              if: always()
+              run: |
+                set +e
+                docker ps -a
+                echo ::group::MANAGER_LOGS
+                docker logs --tail=10000 compose-manager-1
+                echo ::endgroup::
+                echo ::group::WORKER_LOGS
+                docker logs --tail=10000 compose-worker-1
+                echo ::endgroup::
+                echo ::group::CONTENT_LOGS
+                docker logs --tail=10000 compose-content-1
+                echo ::endgroup::
+                echo ::group::API_LOGS
+                docker logs --tail=10000 compose-api-1
+                echo ::endgroup::
+                echo ::group::DEPENDENCIES
+                docker exec compose-manager-1 bash -c "pip list && pip install pipdeptree && pipdeptree"
+                echo ::endgroup::
+                curl -u "${{ env.DJANGO_SUPERUSER_USERNAME }}:${{ env.DJANGO_SUPERUSER_PASSWORD }}" \
+                -L http://localhost:5001${{ env.PULP_GALAXY_API_PATH_PREFIX }}pulp/api/v3/status/ | jq || true

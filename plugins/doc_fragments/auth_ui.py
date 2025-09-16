@@ -32,6 +32,15 @@ options:
     - If value not set, will try environment variable E(AH_PASSWORD), or E(AAP_PASSWORD).
     type: str
     aliases: [ aap_password ]
+  ah_token:
+    description:
+    - The Ansible Automation Hub API token to use.
+    - This value can be in one of two formats.
+    - A string which is the token itself. (for example, bqV5txm97wqJqtkxlMkhQz0pKhRMMX)
+    - A dictionary structure as returned by the ah_token module.
+    - If value not set, will try environment variable E(AH_API_TOKEN), or E(AAP_TOKEN).
+    type: raw
+    aliases: [ aap_token ]
   validate_certs:
     description:
     - Whether to allow insecure connections to Automation Hub Server.

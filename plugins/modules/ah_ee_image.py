@@ -66,7 +66,7 @@ EXAMPLES = r"""
     ah_host: hub.example.com
     ah_username: admin
     ah_password: Sup3r53cr3t
-  no_log: yes
+  no_log: true
 
 - name: Replace all the image tags
   ansible.hub.ah_ee_image:
@@ -79,7 +79,7 @@ EXAMPLES = r"""
     ah_host: hub.example.com
     ah_username: admin
     ah_password: Sup3r53cr3t
-  no_log: yes
+  no_log: true
 
 - name: Ensure the image does not exist
   ansible.hub.ah_ee_image:
@@ -88,7 +88,7 @@ EXAMPLES = r"""
     ah_host: hub.example.com
     ah_username: admin
     ah_password: Sup3r53cr3t
-  no_log: yes
+  no_log: true
 """
 
 RETURN = r""" # """
