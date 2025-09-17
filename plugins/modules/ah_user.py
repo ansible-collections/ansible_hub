@@ -90,16 +90,16 @@ EXAMPLES = r"""
     ah_host: hub.example.com
     ah_username: admin
     ah_password: Sup3r53cr3t
-  no_log: True
+  no_log: true
 
 - name: Ensure the user is removed
   ansible.hub.ah_user:
-    username:  dwilde
+    username: dwilde
     state: absent
     ah_host: hub.example.com
     ah_username: admin
     ah_password: Sup3r53cr3t
-  no_log: True
+  no_log: true
 
 - name: Ensure the user only belongs to the operators and developers groups
   ansible.hub.ah_user:
@@ -112,7 +112,7 @@ EXAMPLES = r"""
     ah_host: hub.example.com
     ah_username: admin
     ah_password: Sup3r53cr3t
-  no_log: True
+  no_log: true
 
 - name: Ensure the user is added to the managers group
   ansible.hub.ah_user:
@@ -124,7 +124,7 @@ EXAMPLES = r"""
     ah_host: hub.example.com
     ah_username: admin
     ah_password: Sup3r53cr3t
-  no_log: True
+  no_log: true
 
 - name: Ensure the password is changed
   ansible.hub.ah_user:
@@ -134,7 +134,7 @@ EXAMPLES = r"""
     ah_host: hub.example.com
     ah_username: admin
     ah_password: Sup3r53cr3t
-  no_log: True
+  no_log: true
 
 - name: Ensure the user is a super user
   ansible.hub.ah_user:
@@ -144,7 +144,7 @@ EXAMPLES = r"""
     ah_host: hub.example.com
     ah_username: admin
     ah_password: Sup3r53cr3t
-  no_log: True
+  no_log: true
 """
 
 RETURN = r""" # """

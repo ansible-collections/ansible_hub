@@ -44,7 +44,6 @@ EXAMPLES = """
     namespace: namespace
     name: collection_name
     version: v1.0.0
-
 """
 
 from ..module_utils.ah_module import AHModule

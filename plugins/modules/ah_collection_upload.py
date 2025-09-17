@@ -48,7 +48,6 @@ EXAMPLES = """
 - name: Upload collection to automation hub from galaxy
   ansible.hub.ah_collection_upload:
     path: https://galaxy.ansible.com/download/theforeman-foreman-3.2.0.tar.gz
-
 """
 
 from ..module_utils.ah_module import AHModule
