@@ -192,11 +192,6 @@ def main():
     # Authenticate
     module.authenticate()
 
-    # Only recent versions support execution environment
-    vers = module.get_server_version()
-    if vers < "4.6":
-        module.fail_json(msg="This module requires private automation hub version 4.6 or later. Your version is {vers}".format(vers=vers))
-
     # Process the object from the Pulp API (delete or create)
     role_pulp = AHPulpRolePerm(module)
     role_pulp.get_object(name)
