@@ -153,11 +153,6 @@ def main():
     group = AHPulpGroups(module)
     vers = module.get_server_version()
 
-    if vers >= "4.11" and module.behind_resource_server:
-        module.fail_json(
-            msg=f"Module compatible with server version 4.10 or earlier, server version is {vers}"
-        )
-
     for index, role_item in enumerate(group_role_data['role_list']):
         group_role_data['role_list'][index]['content_urls'] = []
         if "targets" in role_item and role_item['targets'] is not None:
