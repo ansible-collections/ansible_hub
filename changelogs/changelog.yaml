@@ -22,3 +22,10 @@ releases:
     fragments:
     - fix-error-msg.yml
     release_date: '2025-09-17'
+  1.0.3:
+    changes:
+      bugfixes:
+      - Fixed an issue where an incompatibility message was too restrictive.
+    fragments:
+    - fix-error.msg.yml
+    release_date: '2025-10-22'
