@@ -4,6 +4,14 @@ ansible.hub Release Notes
 
 .. contents:: Topics
 
+v1.0.3
+======
+
+Bugfixes
+--------
+
+- Fixed an issue where an incompatibility message was too restrictive.
+
 v1.0.2
 ======
 

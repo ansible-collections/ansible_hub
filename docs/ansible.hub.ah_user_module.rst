@@ -3,7 +3,7 @@
 ansible.hub.ah_user module -- Manage private automation hub users
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-This module is part of the `ansible.hub collection <https://galaxy.ansible.com/ui/repo/published/ansible/hub/>`_ (version 1.0.1).
+This module is part of the `ansible.hub collection <https://galaxy.ansible.com/ui/repo/published/ansible/hub/>`_ (version 1.0.2).
 
 It is not included in ``ansible-core``.
 To check whether it is installed, run ``ansible-galaxy collection list``.
@@ -91,6 +91,25 @@ Parameters
       <p>For galaxy_ng this is either <code class="ansible-value literal notranslate">automation-hub</code> or the custom prefix used on install with <code class="xref std std-envvar literal notranslate">GALAXY_API_PATH_PREFIX</code>.</p>
       <p>For Automation Hub this is <code class="ansible-value literal notranslate">galaxy</code>.</p>
       <p style="margin-top: 8px;"><b style="color: blue;">Default:</b> <code style="color: blue;">&#34;galaxy&#34;</code></p>
+    </td>
+  </tr>
+  <tr>
+    <td valign="top">
+      <div class="ansibleOptionAnchor" id="parameter-ah_token"></div>
+      <div class="ansibleOptionAnchor" id="parameter-aap_token"></div>
+      <p style="display: inline;"><strong>ah_token</strong></p>
+      <a class="ansibleOptionLink" href="#parameter-ah_token" title="Permalink to this option"></a>
+      <p style="font-size: small; margin-bottom: 0;"><span style="color: darkgreen; white-space: normal;">aliases: aap_token</span></p>
+      <p style="font-size: small; margin-bottom: 0;">
+        <span style="color: purple;">any</span>
+      </p>
+    </td>
+    <td valign="top">
+      <p>The Ansible Automation Hub API token to use.</p>
+      <p>This value can be in one of two formats.</p>
+      <p>A string which is the token itself. (for example, bqV5txm97wqJqtkxlMkhQz0pKhRMMX)</p>
+      <p>A dictionary structure as returned by the ah_token module.</p>
+      <p>If value not set, will try environment variable <code class="xref std std-envvar literal notranslate">AH_API_TOKEN</code>, or <code class="xref std std-envvar literal notranslate">AAP_TOKEN</code>.</p>
     </td>
   </tr>
   <tr>
@@ -323,16 +342,16 @@ Examples
         ah_host: hub.example.com
         ah_username: admin
         ah_password: Sup3r53cr3t
-      no_log: True
+      no_log: true
 
     - name: Ensure the user is removed
       ansible.hub.ah_user:
-        username:  dwilde
+        username: dwilde
         state: absent
         ah_host: hub.example.com
         ah_username: admin
         ah_password: Sup3r53cr3t
-      no_log: True
+      no_log: true
 
     - name: Ensure the user only belongs to the operators and developers groups
       ansible.hub.ah_user:
@@ -345,7 +364,7 @@ Examples
         ah_host: hub.example.com
         ah_username: admin
         ah_password: Sup3r53cr3t
-      no_log: True
+      no_log: true
 
     - name: Ensure the user is added to the managers group
       ansible.hub.ah_user:
@@ -357,7 +376,7 @@ Examples
         ah_host: hub.example.com
         ah_username: admin
         ah_password: Sup3r53cr3t
-      no_log: True
+      no_log: true
 
     - name: Ensure the password is changed
       ansible.hub.ah_user:
@@ -367,7 +386,7 @@ Examples
         ah_host: hub.example.com
         ah_username: admin
         ah_password: Sup3r53cr3t
-      no_log: True
+      no_log: true
 
     - name: Ensure the user is a super user
       ansible.hub.ah_user:
@@ -377,7 +396,7 @@ Examples
         ah_host: hub.example.com
         ah_username: admin
         ah_password: Sup3r53cr3t
-      no_log: True
+      no_log: true
 
 
 

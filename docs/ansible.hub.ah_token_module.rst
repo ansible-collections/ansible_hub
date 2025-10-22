@@ -3,7 +3,7 @@
 ansible.hub.ah_token module -- Create, update, or destroy Automation Hub tokens
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-This module is part of the `ansible.hub collection <https://galaxy.ansible.com/ui/repo/published/ansible/hub/>`_ (version 1.0.1).
+This module is part of the `ansible.hub collection <https://galaxy.ansible.com/ui/repo/published/ansible/hub/>`_ (version 1.0.2).
 
 It is not included in ``ansible-core``.
 To check whether it is installed, run ``ansible-galaxy collection list``.
@@ -209,25 +209,25 @@ Examples
     - name: Create a new token using an existing token
       ansible.hub.ah_token:
         ah_token: "{{ my_existing_token }}"
-      no_log: True
+      no_log: true
 
     - name: Delete this token
       ansible.hub.ah_token:
         ah_token: "{{ ah_token }}"
         state: absent
-      no_log: True
+      no_log: true
 
     - name: Create a new token using username/password
       ansible.hub.ah_token:
         state: present
         ah_username: "{{ my_username }}"
         ah_password: "{{ my_password }}"
-      no_log: True
+      no_log: true
 
     - name: Use our new token to make another call
       ansible.hub.namespace:
         ah_token: "{{ ah_token }}"
-      no_log: True
+      no_log: true
 
 
 
