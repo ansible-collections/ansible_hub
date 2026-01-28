@@ -22,3 +22,4 @@ action_groups:
     - collection_repository
     - collection_repository_sync
     - group_roles
+    - team_roles
