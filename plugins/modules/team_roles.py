@@ -23,7 +23,7 @@ description:
   - Uses the Hub UI v2 API for role assignments.
   - Requires private automation hub version 4.11 or later.
 author:
-  - Red Hat
+  - Brian McLaughlin (@bmclaughlin)
 options:
   team:
     description:
@@ -41,11 +41,13 @@ options:
     description:
       - Resource targets to scope the role to.
       - Required for object-level roles.
+      - When multiple namespaces are specified, a separate role assignment is created for each.
     type: dict
     suboptions:
       collection_namespaces:
         description:
           - List of collection namespaces to limit permissions to.
+          - Each namespace will receive its own role assignment.
         type: list
         elements: str
   state:
@@ -66,6 +68,19 @@ EXAMPLES = """
     targets:
       collection_namespaces:
         - my_namespace
+    state: present
+    ah_host: hub.example.com
+    ah_username: admin
+    ah_password: Sup3r53cr3t
+
+- name: Assign role to a team for multiple namespaces
+  ansible.hub.team_roles:
+    team: my_team
+    role: galaxy.collection_namespace_owner
+    targets:
+      collection_namespaces:
+        - namespace_one
+        - namespace_two
     state: present
     ah_host: hub.example.com
     ah_username: admin
@@ -94,9 +109,11 @@ role:
   type: str
   returned: always
 object_id:
-  description: The target object ID if a scoped role was used.
+  description:
+    - The target object ID if a scoped role was used.
+    - When multiple namespaces are specified, only the last processed object ID is returned.
   type: str
-  returned: when targets are specified
+  returned: when targets are specified and a change was made
 """
 
 from ..module_utils.ah_api_module import AHAPIModule, AHAPIModuleError
