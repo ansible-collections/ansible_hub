@@ -32,15 +32,11 @@
         test_team: "test_team_{{ test_id }}"
         test_namespace: "test_ns_{{ test_id }}"
 
-    # Setup: Create a test team using ansible.platform.team
+    # Setup: Create a test team/group
     - name: Create test team
-      ansible.platform.team:
+      ansible.hub.ah_group:
         name: "{{ test_team }}"
-        organization: Default
-        aap_hostname: "{{ ah_host }}"
-        aap_username: "{{ ah_username }}"
-        aap_password: "{{ ah_password }}"
-        aap_validate_certs: "{{ ah_verify_ssl }}"
+        state: present
       register: r_team_create
 
     # Test: Assign a global role to the team
@@ -185,12 +181,7 @@
 
     # Cleanup: Remove test team
     - name: Delete test team
-      ansible.platform.team:
+      ansible.hub.ah_group:
         name: "{{ test_team | default('') }}"
-        organization: Default
         state: absent
-        aap_hostname: "{{ ah_host }}"
-        aap_username: "{{ ah_username }}"
-        aap_password: "{{ ah_password }}"
-        aap_validate_certs: "{{ ah_verify_ssl }}"
       ignore_errors: true

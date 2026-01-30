@@ -38,15 +38,12 @@
         test_team: "test_team_token_{{ test_id }}"
         test_namespace: "test_ns_token_{{ test_id }}"
 
-    # Setup: Create a test team using ansible.platform.team
+    # Setup: Create a test team/group
     - name: Create test team
-      ansible.platform.team:
+      ansible.hub.ah_group:
         name: "{{ test_team }}"
-        organization: Default
-        aap_hostname: "{{ ah_host }}"
-        aap_username: "{{ ah_username }}"
-        aap_password: "{{ ah_password }}"
-        aap_validate_certs: "{{ ah_verify_ssl }}"
+        state: present
+        ah_token: "{{ test_token.token }}"
       register: r_team_create
 
     # Test: Assign a global role to the team
@@ -55,7 +52,7 @@
         team: "{{ test_team }}"
         role: galaxy.collection_admin
         state: present
-        ah_token: "{{ ah_token.token }}"
+        ah_token: "{{ test_token.token }}"
       register: r_role_assign
 
     - name: Check if the role was assigned
@@ -71,7 +68,7 @@
         team: "{{ test_team }}"
         role: galaxy.collection_admin
         state: present
-        ah_token: "{{ ah_token.token }}"
+        ah_token: "{{ test_token.token }}"
       register: r_role_assign_idempotent
 
     - name: Check idempotency
@@ -85,7 +82,7 @@
         team: "{{ test_team }}"
         role: galaxy.collection_admin
         state: absent
-        ah_token: "{{ ah_token.token }}"
+        ah_token: "{{ test_token.token }}"
       register: r_role_remove
 
     - name: Check if the role was removed
@@ -99,7 +96,7 @@
         team: "{{ test_team }}"
         role: galaxy.collection_admin
         state: absent
-        ah_token: "{{ ah_token.token }}"
+        ah_token: "{{ test_token.token }}"
       register: r_role_remove_idempotent
 
     - name: Check removal idempotency
@@ -112,7 +109,7 @@
       ansible.hub.ah_namespace:
         name: "{{ test_namespace }}"
         state: present
-        ah_token: "{{ ah_token.token }}"
+        ah_token: "{{ test_token.token }}"
       register: r_namespace_create
 
     - name: Check if the namespace was created
@@ -129,7 +126,7 @@
           collection_namespaces:
             - "{{ test_namespace }}"
         state: present
-        ah_token: "{{ ah_token.token }}"
+        ah_token: "{{ test_token.token }}"
       register: r_scoped_role_assign
 
     - name: Check if the scoped role was assigned
@@ -148,7 +145,7 @@
           collection_namespaces:
             - "{{ test_namespace }}"
         state: present
-        ah_token: "{{ ah_token.token }}"
+        ah_token: "{{ test_token.token }}"
       register: r_scoped_role_assign_idempotent
 
     - name: Check scoped role idempotency
@@ -165,7 +162,7 @@
           collection_namespaces:
             - "{{ test_namespace }}"
         state: absent
-        ah_token: "{{ ah_token.token }}"
+        ah_token: "{{ test_token.token }}"
       register: r_scoped_role_remove
 
     - name: Check if the scoped role was removed
@@ -182,7 +179,7 @@
           collection_namespaces:
             - "{{ test_namespace }}"
         state: absent
-        ah_token: "{{ ah_token.token }}"
+        ah_token: "{{ test_token.token }}"
       register: r_scoped_role_remove_idempotent
 
     - name: Check scoped role removal idempotency
@@ -201,14 +198,10 @@
 
     # Cleanup: Remove test team
     - name: Delete test team
-      ansible.platform.team:
+      ansible.hub.ah_group:
         name: "{{ test_team | default('') }}"
-        organization: Default
         state: absent
-        aap_hostname: "{{ ah_host }}"
-        aap_username: "{{ ah_username }}"
-        aap_password: "{{ ah_password }}"
-        aap_validate_certs: "{{ ah_verify_ssl }}"
+        ah_token: "{{ test_token.token | default('') }}"
       ignore_errors: true
 
     # Cleanup: Remove test token
