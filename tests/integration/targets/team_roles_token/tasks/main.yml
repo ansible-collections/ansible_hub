@@ -2,7 +2,7 @@
 # Check server version - team_roles requires 4.11+
 - name: Get server version
   ansible.builtin.uri:
-    url: "{{ ah_host }}/api/galaxy/"
+    url: "{{ ah_host }}api/galaxy/"
     user: "{{ ah_username }}"
     password: "{{ ah_password }}"
     force_basic_auth: true
