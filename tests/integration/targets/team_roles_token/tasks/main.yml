@@ -1,20 +1,5 @@
 ---
-# Check server version - team_roles requires 4.11+
-- name: Get server version
-  ansible.builtin.uri:
-    url: "{{ ah_host }}api/galaxy/"
-    user: "{{ ah_username }}"
-    password: "{{ ah_password }}"
-    force_basic_auth: true
-    validate_certs: "{{ ah_verify_ssl }}"
-  register: server_info
-
-- name: Display server version
-  ansible.builtin.debug:
-    msg: "Server version: {{ server_info.json.server_version | default('unknown') }}"
-
 - name: team_roles integration tests with token auth
-  when: server_info.json.server_version is version('4.11', '>=')
   module_defaults:
     group/ansible.hub.hub:
       ah_host: "{{ ah_host }}"
