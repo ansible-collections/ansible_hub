@@ -15,6 +15,7 @@ action_groups:
     - ah_ee_repository_sync
     - ah_group
     - ah_namespace
+    - ah_team
     - ah_role
     - ah_token
     - ah_user

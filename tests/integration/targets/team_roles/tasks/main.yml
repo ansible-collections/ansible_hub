@@ -19,16 +19,16 @@
 
     # Setup: Create a test team/group
     - name: Create test team
-      ansible.hub.ah_group:
+      ansible.hub.ah_team:
         name: "{{ test_team }}"
         state: present
       register: r_team_create
 
     # Test: Assign a global role to the team
-    - name: Assign galaxy.collection_admin role to the team
+    - name: Assign galaxy.collection_curator role to the team
       ansible.hub.team_roles:
         team: "{{ test_team }}"
-        role: galaxy.collection_admin
+        role: galaxy.collection_curator
         state: present
       register: r_role_assign
 
@@ -37,13 +37,13 @@
         that:
           - r_role_assign.changed
           - r_role_assign.team == test_team
-          - r_role_assign.role == "galaxy.collection_admin"
+          - r_role_assign.role == "galaxy.collection_curator"
 
     # Test: Idempotency - re-run should not change
-    - name: Assign galaxy.collection_admin role to the team (idempotency)
+    - name: Assign galaxy.collection_curator role to the team (idempotency)
       ansible.hub.team_roles:
         team: "{{ test_team }}"
-        role: galaxy.collection_admin
+        role: galaxy.collection_curator
         state: present
       register: r_role_assign_idempotent
 
@@ -53,10 +53,10 @@
           - not r_role_assign_idempotent.changed
 
     # Test: Remove the role from the team
-    - name: Remove galaxy.collection_admin role from the team
+    - name: Remove galaxy.collection_curator role from the team
       ansible.hub.team_roles:
         team: "{{ test_team }}"
-        role: galaxy.collection_admin
+        role: galaxy.collection_curator
         state: absent
       register: r_role_remove
 
@@ -66,10 +66,10 @@
           - r_role_remove.changed
 
     # Test: Idempotency - removing again should not change
-    - name: Remove galaxy.collection_admin role from the team (idempotency)
+    - name: Remove galaxy.collection_curator role from the team (idempotency)
       ansible.hub.team_roles:
         team: "{{ test_team }}"
-        role: galaxy.collection_admin
+        role: galaxy.collection_curator
         state: absent
       register: r_role_remove_idempotent
 
@@ -166,7 +166,7 @@
 
     # Cleanup: Remove test team
     - name: Delete test team
-      ansible.hub.ah_group:
+      ansible.hub.ah_team:
         name: "{{ test_team | default('') }}"
         state: absent
       ignore_errors: true

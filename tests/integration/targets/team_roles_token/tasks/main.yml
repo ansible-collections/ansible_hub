@@ -15,7 +15,6 @@
         ah_username: "{{ ah_username }}"
         ah_password: "{{ ah_password }}"
         state: present
-      register: test_token
       no_log: true
 
     - name: Define variables for test resources
@@ -25,19 +24,19 @@
 
     # Setup: Create a test team/group
     - name: Create test team
-      ansible.hub.ah_group:
+      ansible.hub.ah_team:
         name: "{{ test_team }}"
         state: present
-        ah_token: "{{ test_token.token }}"
+        ah_token: "{{ ah_token.token }}"
       register: r_team_create
 
     # Test: Assign a global role to the team
-    - name: Assign galaxy.collection_admin role to the team (token auth)
+    - name: Assign galaxy.collection_curator role to the team (token auth)
       ansible.hub.team_roles:
         team: "{{ test_team }}"
-        role: galaxy.collection_admin
+        role: galaxy.collection_curator
         state: present
-        ah_token: "{{ test_token.token }}"
+        ah_token: "{{ ah_token.token }}"
       register: r_role_assign
 
     - name: Check if the role was assigned
@@ -45,15 +44,15 @@
         that:
           - r_role_assign.changed
           - r_role_assign.team == test_team
-          - r_role_assign.role == "galaxy.collection_admin"
+          - r_role_assign.role == "galaxy.collection_curator"
 
     # Test: Idempotency - re-run should not change
-    - name: Assign galaxy.collection_admin role to the team (idempotency, token auth)
+    - name: Assign galaxy.collection_curator role to the team (idempotency, token auth)
       ansible.hub.team_roles:
         team: "{{ test_team }}"
-        role: galaxy.collection_admin
+        role: galaxy.collection_curator
         state: present
-        ah_token: "{{ test_token.token }}"
+        ah_token: "{{ ah_token.token }}"
       register: r_role_assign_idempotent
 
     - name: Check idempotency
@@ -62,12 +61,12 @@
           - not r_role_assign_idempotent.changed
 
     # Test: Remove the role from the team
-    - name: Remove galaxy.collection_admin role from the team (token auth)
+    - name: Remove galaxy.collection_curator role from the team (token auth)
       ansible.hub.team_roles:
         team: "{{ test_team }}"
-        role: galaxy.collection_admin
+        role: galaxy.collection_curator
         state: absent
-        ah_token: "{{ test_token.token }}"
+        ah_token: "{{ ah_token.token }}"
       register: r_role_remove
 
     - name: Check if the role was removed
@@ -76,12 +75,12 @@
           - r_role_remove.changed
 
     # Test: Idempotency - removing again should not change
-    - name: Remove galaxy.collection_admin role from the team (idempotency, token auth)
+    - name: Remove galaxy.collection_curator role from the team (idempotency, token auth)
       ansible.hub.team_roles:
         team: "{{ test_team }}"
-        role: galaxy.collection_admin
+        role: galaxy.collection_curator
         state: absent
-        ah_token: "{{ test_token.token }}"
+        ah_token: "{{ ah_token.token }}"
       register: r_role_remove_idempotent
 
     - name: Check removal idempotency
@@ -94,7 +93,7 @@
       ansible.hub.ah_namespace:
         name: "{{ test_namespace }}"
         state: present
-        ah_token: "{{ test_token.token }}"
+        ah_token: "{{ ah_token.token }}"
       register: r_namespace_create
 
     - name: Check if the namespace was created
@@ -111,7 +110,7 @@
           collection_namespaces:
             - "{{ test_namespace }}"
         state: present
-        ah_token: "{{ test_token.token }}"
+        ah_token: "{{ ah_token.token }}"
       register: r_scoped_role_assign
 
     - name: Check if the scoped role was assigned
@@ -130,7 +129,7 @@
           collection_namespaces:
             - "{{ test_namespace }}"
         state: present
-        ah_token: "{{ test_token.token }}"
+        ah_token: "{{ ah_token.token }}"
       register: r_scoped_role_assign_idempotent
 
     - name: Check scoped role idempotency
@@ -147,7 +146,7 @@
           collection_namespaces:
             - "{{ test_namespace }}"
         state: absent
-        ah_token: "{{ test_token.token }}"
+        ah_token: "{{ ah_token.token }}"
       register: r_scoped_role_remove
 
     - name: Check if the scoped role was removed
@@ -164,7 +163,7 @@
           collection_namespaces:
             - "{{ test_namespace }}"
         state: absent
-        ah_token: "{{ test_token.token }}"
+        ah_token: "{{ ah_token.token }}"
       register: r_scoped_role_remove_idempotent
 
     - name: Check scoped role removal idempotency
@@ -183,10 +182,10 @@
 
     # Cleanup: Remove test team
     - name: Delete test team
-      ansible.hub.ah_group:
+      ansible.hub.ah_team:
         name: "{{ test_team | default('') }}"
         state: absent
-        ah_token: "{{ test_token.token | default('') }}"
+        ah_token: "{{ ah_token.token | default('') }}"
       ignore_errors: true
 
     # Cleanup: Remove test token

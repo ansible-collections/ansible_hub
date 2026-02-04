@@ -173,6 +173,14 @@ jobs:
               run: ansible-test integration -vvv --color yes ah_user
               working-directory: /home/runner/.ansible/collections/ansible_collections/ansible/hub
 
+            - name: Run integration test - ah_team
+              run: ansible-test integration -vvv --color yes ah_team
+              working-directory: /home/runner/.ansible/collections/ansible_collections/ansible/hub
+
+            - name: Run integration test - ah_team_token
+              run: ansible-test integration -vvv --color yes ah_team_token
+              working-directory: /home/runner/.ansible/collections/ansible_collections/ansible/hub
+
             - name: Run integration test - team_roles
               run: ansible-test integration -vvv --color yes team_roles
               working-directory: /home/runner/.ansible/collections/ansible_collections/ansible/hub

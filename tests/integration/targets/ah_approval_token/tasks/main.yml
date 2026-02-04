@@ -16,7 +16,6 @@
         ah_username: "{{ ah_username }}"
         ah_password: "{{ ah_password }}"
         state: present
-      register: test_token
       no_log: true
 
     - name: Define variables (token auth)
@@ -36,7 +35,7 @@
         links:
           - name: "homepage"
             url: "https://www.redhat.com"
-        ah_token: "{{ test_token.token }}"
+        ah_token: "{{ ah_token.token }}"
       register: r_token_namespace
 
     - name: Check if the namespace is created (token auth)
@@ -67,7 +66,7 @@
         name: "{{ collection_name }}"
         path: "{{ build_path }}/sample-sample-1.0.0.tar.gz"
         auto_approve: false
-        ah_token: "{{ test_token.token }}"
+        ah_token: "{{ ah_token.token }}"
       register: r_token_upload
 
     - name: Check if the collection is uploaded successfully (token auth)
@@ -80,7 +79,7 @@
         namespace: "{{ namespace_token }}"
         name: "{{ collection_name }}"
         version: 1.0.0
-        ah_token: "{{ test_token.token }}"
+        ah_token: "{{ ah_token.token }}"
       register: r_token_approval
 
     - name: Check if the collection is approved (token auth)
@@ -94,7 +93,7 @@
         name: "{{ collection_name }}"
         version: 1.0.0
         state: absent
-        ah_token: "{{ test_token.token }}"
+        ah_token: "{{ ah_token.token }}"
       register: r_token_delete
 
     - name: Check if the collection is deleted successfully (token auth)
@@ -110,14 +109,14 @@
         name: "{{ collection_name }}"
         version: 1.0.0
         state: absent
-        ah_token: "{{ test_token.token | default('') }}"
+        ah_token: "{{ ah_token.token | default('') }}"
       ignore_errors: true
 
     - name: Delete namespace (token auth)
       ansible.hub.ah_namespace:
         name: "{{ namespace_token | default('') }}"
         state: absent
-        ah_token: "{{ test_token.token | default('') }}"
+        ah_token: "{{ ah_token.token | default('') }}"
       ignore_errors: true
 
     - name: Remove built collection (token auth)
@@ -130,7 +129,7 @@
       ansible.hub.ah_token:
         ah_username: "{{ ah_username }}"
         ah_password: "{{ ah_password }}"
-        token: "{{ test_token.token | default('') }}"
+        token: "{{ ah_token.token | default('') }}"
         state: absent
       ignore_errors: true
       no_log: true

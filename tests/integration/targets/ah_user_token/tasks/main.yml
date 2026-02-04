@@ -14,7 +14,6 @@
         ah_username: "{{ ah_username }}"
         ah_password: "{{ ah_password }}"
         state: present
-      register: test_token
       no_log: true
 
     - name: Ensure the user exists (token auth)
@@ -25,7 +24,7 @@
         email: "user_token_{{ test_id }}@example.com"
         password: vs9mrD55NP
         state: present
-        ah_token: "{{ test_token.token }}"
+        ah_token: "{{ ah_token.token }}"
       register: r_token
 
     - name: Check if the user is created (token auth)
@@ -38,14 +37,14 @@
       ansible.hub.ah_user:
         username: "user_token_{{ test_id }}"
         state: absent
-        ah_token: "{{ test_token.token | default('') }}"
+        ah_token: "{{ ah_token.token | default('') }}"
       ignore_errors: true
 
     - name: Remove test token
       ansible.hub.ah_token:
         ah_username: "{{ ah_username }}"
         ah_password: "{{ ah_password }}"
-        token: "{{ test_token.token | default('') }}"
+        token: "{{ ah_token.token | default('') }}"
         state: absent
       ignore_errors: true
       no_log: true
