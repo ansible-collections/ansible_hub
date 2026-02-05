@@ -14,7 +14,6 @@
         ah_username: "{{ ah_username }}"
         ah_password: "{{ ah_password }}"
         state: present
-      register: test_token
       no_log: true
 
     - name: Define variables (token auth)
@@ -33,7 +32,7 @@
           state: present
         remote: community
         wait: true
-        ah_token: "{{ test_token.token }}"
+        ah_token: "{{ ah_token.token }}"
       register: r_token_repo
 
     - name: Check if the collection repository is created (token auth)
@@ -48,7 +47,7 @@
         requirements:
           - galaxy.galaxy
           - infra.controller_configuration
-        ah_token: "{{ test_token.token }}"
+        ah_token: "{{ ah_token.token }}"
       register: r_token
 
     - name: Check if the collection_remote works (token auth)
@@ -61,14 +60,14 @@
       ansible.hub.collection_repository:
         name: "{{ collection_repo_name_token | default('') }}"
         state: absent
-        ah_token: "{{ test_token.token | default('') }}"
+        ah_token: "{{ ah_token.token | default('') }}"
       ignore_errors: true
 
     - name: Remove test token
       ansible.hub.ah_token:
         ah_username: "{{ ah_username }}"
         ah_password: "{{ ah_password }}"
-        token: "{{ test_token.token | default('') }}"
+        token: "{{ ah_token.token | default('') }}"
         state: absent
       ignore_errors: true
       no_log: true

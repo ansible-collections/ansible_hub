@@ -14,7 +14,6 @@
         ah_username: "{{ ah_username }}"
         ah_password: "{{ ah_password }}"
         state: present
-      register: test_token
       no_log: true
 
     - name: Define variables (token auth)
@@ -27,7 +26,7 @@
         name: "{{ registry_name_token }}"
         url: https://quay.io/my/registry
         state: present
-        ah_token: "{{ test_token.token }}"
+        ah_token: "{{ ah_token.token }}"
       register: r_token_registry
 
     - name: Check if the remote registry EE is created (token auth)
@@ -43,7 +42,7 @@
         include_tags:
           - latest
         state: present
-        ah_token: "{{ test_token.token }}"
+        ah_token: "{{ ah_token.token }}"
       register: r_token
 
     - name: Check if the remote repository EE is created (token auth)
@@ -55,7 +54,7 @@
       ansible.hub.ah_ee_repository:
         name: "{{ ee_repo_name_token }}"
         state: absent
-        ah_token: "{{ test_token.token }}"
+        ah_token: "{{ ah_token.token }}"
       register: r_token_delete
 
     - name: Check if the remote repository EE is deleted (token auth)
@@ -68,21 +67,21 @@
       ansible.hub.ah_ee_repository:
         name: "{{ ee_repo_name_token | default('') }}"
         state: absent
-        ah_token: "{{ test_token.token | default('') }}"
+        ah_token: "{{ ah_token.token | default('') }}"
       ignore_errors: true
 
     - name: Remove EE remote registry (token auth)
       ansible.hub.ah_ee_registry:
         name: "{{ registry_name_token | default('') }}"
         state: absent
-        ah_token: "{{ test_token.token | default('') }}"
+        ah_token: "{{ ah_token.token | default('') }}"
       ignore_errors: true
 
     - name: Remove test token
       ansible.hub.ah_token:
         ah_username: "{{ ah_username }}"
         ah_password: "{{ ah_password }}"
-        token: "{{ test_token.token | default('') }}"
+        token: "{{ ah_token.token | default('') }}"
         state: absent
       ignore_errors: true
       no_log: true

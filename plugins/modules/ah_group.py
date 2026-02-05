@@ -84,11 +84,6 @@ def main():
     module.authenticate()
     vers = module.get_server_version()
 
-    if vers >= "4.11" and module.behind_resource_server:
-        module.fail_json(
-            msg=f"Module compatible with server version 4.10 or earlier, server version is {vers}"
-        )
-
     # Use Pulp with newer versions
     if vers > "4.7.0":
         group = AHPulpGroups(module)

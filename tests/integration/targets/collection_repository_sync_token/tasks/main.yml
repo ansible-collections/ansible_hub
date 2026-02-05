@@ -14,14 +14,13 @@
         ah_username: "{{ ah_username }}"
         ah_password: "{{ ah_password }}"
         state: present
-      register: test_token
       no_log: true
 
     - name: Sync rh-certified in check mode (token auth)
       ansible.hub.collection_repository_sync:
         name: rh-certified
         wait: false
-        ah_token: "{{ test_token.token }}"
+        ah_token: "{{ ah_token.token }}"
       check_mode: true
       register: r_token_check
 
@@ -34,7 +33,7 @@
       ansible.hub.collection_repository_sync:
         name: rh-certified
         wait: false
-        ah_token: "{{ test_token.token }}"
+        ah_token: "{{ ah_token.token }}"
       register: r_token
 
     - name: Check if sync is successful (token auth)
@@ -47,7 +46,7 @@
       ansible.hub.ah_token:
         ah_username: "{{ ah_username }}"
         ah_password: "{{ ah_password }}"
-        token: "{{ test_token.token | default('') }}"
+        token: "{{ ah_token.token | default('') }}"
         state: absent
       ignore_errors: true
       no_log: true
