@@ -81,7 +81,7 @@ from ..module_utils.ah_api_module import AHAPIModule, AHAPIModuleError
 
 def get_team(module, team_name):
     """Look up team by name and return full team object."""
-    url = module.build_ui_v2_url( "teams", query_params={"name": team_name})
+    url = module.build_ui_v2_url("teams", query_params={"name": team_name})
     try:
         response = module.make_request("GET", url)
     except AHAPIModuleError as e:
@@ -100,7 +100,7 @@ def get_team(module, team_name):
 
 def create_team(module, team_name):
     """Create a new team."""
-    url = module.build_ui_v2_url( "teams")
+    url = module.build_ui_v2_url("teams")
     data = {"name": team_name}
 
     try:
@@ -117,7 +117,7 @@ def create_team(module, team_name):
 
 def delete_team(module, team_id):
     """Delete an existing team."""
-    url = module.build_ui_v2_url( "teams/{0}".format(team_id))
+    url = module.build_ui_v2_url("teams/{0}".format(team_id))
     try:
         response = module.make_request("DELETE", url)
     except AHAPIModuleError as e:

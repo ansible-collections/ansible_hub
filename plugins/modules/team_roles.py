@@ -121,7 +121,7 @@ from ..module_utils.ah_api_module import AHAPIModule, AHAPIModuleError
 
 def get_team_id(module, team_name):
     """Look up team by name and return its ID."""
-    url = module.build_ui_v2_url( "teams", query_params={"name": team_name})
+    url = module.build_ui_v2_url("teams", query_params={"name": team_name})
     try:
         response = module.make_request("GET", url)
     except AHAPIModuleError as e:
@@ -140,7 +140,7 @@ def get_team_id(module, team_name):
 
 def get_role_definition_id(module, role_name):
     """Look up role definition by name and return its ID."""
-    url = module.build_ui_v2_url( "role_definitions", query_params={"name": role_name})
+    url = module.build_ui_v2_url("role_definitions", query_params={"name": role_name})
     try:
         response = module.make_request("GET", url)
     except AHAPIModuleError as e:
@@ -186,7 +186,7 @@ def get_existing_assignment(module, team_id, role_definition_id, object_id):
     if object_id:
         query_params["object_id"] = str(object_id)
 
-    url = module.build_ui_v2_url( "role_team_assignments", query_params=query_params)
+    url = module.build_ui_v2_url("role_team_assignments", query_params=query_params)
     try:
         response = module.make_request("GET", url)
     except AHAPIModuleError as e:
@@ -216,7 +216,7 @@ def get_existing_assignment(module, team_id, role_definition_id, object_id):
 
 def create_assignment(module, team_id, role_definition_id, object_id):
     """Create a new role team assignment."""
-    url = module.build_ui_v2_url( "role_team_assignments")
+    url = module.build_ui_v2_url("role_team_assignments")
     data = {
         "team": team_id,
         "role_definition": role_definition_id,
@@ -238,7 +238,7 @@ def create_assignment(module, team_id, role_definition_id, object_id):
 
 def delete_assignment(module, assignment_id):
     """Delete an existing role team assignment."""
-    url = module.build_ui_v2_url( "role_team_assignments/{0}".format(assignment_id))
+    url = module.build_ui_v2_url("role_team_assignments/{0}".format(assignment_id))
     try:
         response = module.make_request("DELETE", url)
     except AHAPIModuleError as e:
