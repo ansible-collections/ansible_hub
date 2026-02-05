@@ -1,4 +1,4 @@
-.. Created with antsibull-docs 2.21.0
+.. Created with antsibull-docs 2.24.0
 
 ansible.hub.ah_build module -- Build a collection tar
 +++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -8,7 +8,7 @@ This module is part of the `ansible.hub collection <https://galaxy.ansible.com/u
 It is not included in ``ansible-core``.
 To check whether it is installed, run ``ansible-galaxy collection list``.
 
-To install it, use: :code:`ansible-galaxy collection install ansible.hub`.
+To install it, use: :code:`ansible\-galaxy collection install ansible.hub`.
 
 To use it in a playbook, specify: ``ansible.hub.ah_build``.
 
@@ -126,6 +126,6 @@ Authors
 Collection links
 ~~~~~~~~~~~~~~~~
 
-* `Issue Tracker <https://github.com/ansible-collections/ansible\_hub/issues>`__
-* `Repository (Sources) <https://github.com/ansible-collections/ansible\_hub>`__
-* `Report an issue <https://github.com/ansible-collections/ansible\_hub/issues/new/choose>`__
+* `Issue Tracker <https://github.com/ansible\-collections/ansible\_hub/issues>`__
+* `Repository (Sources) <https://github.com/ansible\-collections/ansible\_hub>`__
+* `Report an issue <https://github.com/ansible\-collections/ansible\_hub/issues/new/choose>`__

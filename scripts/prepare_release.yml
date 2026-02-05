@@ -2,7 +2,7 @@
   hosts: localhost
   vars:
     collection_name: ansible.hub
-    version: 1.0.3
+    version: 1.0.4
   tasks:
     - name: Generate next release version
       when: version is not defined

@@ -1,7 +1,7 @@
 .. Created with antsibull-docs 2.24.0
 
-ansible.hub.ah_ee_registry_index module -- Initiate an execution environment registry indexing
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ansible.hub.ah_team module -- Manage teams in private automation hub
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 This module is part of the `ansible.hub collection <https://galaxy.ansible.com/ui/repo/published/ansible/hub/>`_ (version 1.0.3).
 
@@ -10,7 +10,7 @@ To check whether it is installed, run ``ansible-galaxy collection list``.
 
 To install it, use: :code:`ansible\-galaxy collection install ansible.hub`.
 
-To use it in a playbook, specify: ``ansible.hub.ah_ee_registry_index``.
+To use it in a playbook, specify: ``ansible.hub.ah_team``.
 
 
 .. contents::
@@ -21,7 +21,9 @@ To use it in a playbook, specify: ``ansible.hub.ah_ee_registry_index``.
 Synopsis
 --------
 
-- Initiate an execution environment registry indexing.
+- Create and delete teams in private automation hub.
+- Uses the Hub UI v2 API for team management.
+- Requires private automation hub version 4.11 or later.
 
 
 
@@ -130,20 +132,6 @@ Parameters
   </tr>
   <tr>
     <td valign="top">
-      <div class="ansibleOptionAnchor" id="parameter-interval"></div>
-      <p style="display: inline;"><strong>interval</strong></p>
-      <a class="ansibleOptionLink" href="#parameter-interval" title="Permalink to this option"></a>
-      <p style="font-size: small; margin-bottom: 0;">
-        <span style="color: purple;">float</span>
-      </p>
-    </td>
-    <td valign="top">
-      <p>The interval to request an update from Automation Hub.</p>
-      <p style="margin-top: 8px;"><b style="color: blue;">Default:</b> <code style="color: blue;">1.0</code></p>
-    </td>
-  </tr>
-  <tr>
-    <td valign="top">
       <div class="ansibleOptionAnchor" id="parameter-name"></div>
       <p style="display: inline;"><strong>name</strong></p>
       <a class="ansibleOptionLink" href="#parameter-name" title="Permalink to this option"></a>
@@ -153,7 +141,7 @@ Parameters
       </p>
     </td>
     <td valign="top">
-      <p>Registry name.</p>
+      <p>Name of the team to create or delete.</p>
     </td>
   </tr>
   <tr>
@@ -175,15 +163,23 @@ Parameters
   </tr>
   <tr>
     <td valign="top">
-      <div class="ansibleOptionAnchor" id="parameter-timeout"></div>
-      <p style="display: inline;"><strong>timeout</strong></p>
-      <a class="ansibleOptionLink" href="#parameter-timeout" title="Permalink to this option"></a>
+      <div class="ansibleOptionAnchor" id="parameter-state"></div>
+      <p style="display: inline;"><strong>state</strong></p>
+      <a class="ansibleOptionLink" href="#parameter-state" title="Permalink to this option"></a>
       <p style="font-size: small; margin-bottom: 0;">
-        <span style="color: purple;">integer</span>
+        <span style="color: purple;">string</span>
       </p>
     </td>
     <td valign="top">
-      <p>If waiting for the registry to index this will abort after this amount of seconds.</p>
+      <p>If <code class="ansible-value literal notranslate">absent</code>, then the module deletes the team.</p>
+      <p>The module does not fail if the team does not exist because the state is already as expected.</p>
+      <p>If <code class="ansible-value literal notranslate">present</code>, then the module creates the team if it does not already exist.</p>
+      <p style="margin-top: 8px;"><b">Choices:</b></p>
+      <ul>
+        <li><p><code>&#34;absent&#34;</code></p></li>
+        <li><p><code style="color: blue;"><b>&#34;present&#34;</b></code> <span style="color: blue;">← (default)</span></p></li>
+      </ul>
+
     </td>
   </tr>
   <tr>
@@ -211,25 +207,6 @@ Parameters
 
     </td>
   </tr>
-  <tr>
-    <td valign="top">
-      <div class="ansibleOptionAnchor" id="parameter-wait"></div>
-      <p style="display: inline;"><strong>wait</strong></p>
-      <a class="ansibleOptionLink" href="#parameter-wait" title="Permalink to this option"></a>
-      <p style="font-size: small; margin-bottom: 0;">
-        <span style="color: purple;">boolean</span>
-      </p>
-    </td>
-    <td valign="top">
-      <p>Wait for the registry to finish indexing before returning.</p>
-      <p style="margin-top: 8px;"><b">Choices:</b></p>
-      <ul>
-        <li><p><code>false</code></p></li>
-        <li><p><code style="color: blue;"><b>true</b></code> <span style="color: blue;">← (default)</span></p></li>
-      </ul>
-
-    </td>
-  </tr>
   </tbody>
   </table>
 
@@ -239,26 +216,88 @@ Parameters
 Notes
 -----
 
-- Only works when registry URL is registry.redhat.io
+- Supports :literal:`check\_mode`.
+- This module is for private automation hub version 4.11 or later.
+- For earlier versions, use \ `ansible.hub.ah\_group <ah_group_module.rst>`__ instead.
 
+See Also
+--------
+
+* `ansible.hub.ah\_group <ah_group_module.rst>`__
+
+  Manage private automation hub user groups.
+* `ansible.hub.team\_roles <team_roles_module.rst>`__
+
+  Assign roles to teams in private automation hub.
 
 Examples
 --------
 
 .. code-block:: yaml
 
-    - name: Index redhat registry without waiting
-      ansible.hub.ah_ee_registry_index:
-        name: redhat
-        wait: false
+    - name: Ensure the team exists
+      ansible.hub.ah_team:
+        name: my_team
+        state: present
+        ah_host: hub.example.com
+        ah_username: admin
+        ah_password: Sup3r53cr3t
 
-    - name: Index registry.redhat.io registry and wait up to 300 seconds
-      ansible.hub.ah_ee_registry_index:
-        name: registry_redhat_io
-        wait: true
-        timeout: 300
+    - name: Ensure the team is removed
+      ansible.hub.ah_team:
+        name: my_team
+        state: absent
+        ah_host: hub.example.com
+        ah_username: admin
+        ah_password: Sup3r53cr3t
 
 
+
+
+Return Values
+-------------
+The following are the fields unique to this module:
+
+.. raw:: html
+
+  <table style="width: 100%;">
+  <thead>
+    <tr>
+    <th><p>Key</p></th>
+    <th><p>Description</p></th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr>
+    <td valign="top">
+      <div class="ansibleOptionAnchor" id="return-id"></div>
+      <p style="display: inline;"><strong>id</strong></p>
+      <a class="ansibleOptionLink" href="#return-id" title="Permalink to this return value"></a>
+      <p style="font-size: small; margin-bottom: 0;">
+        <span style="color: purple;">integer</span>
+      </p>
+    </td>
+    <td valign="top">
+      <p>The ID of the team.</p>
+      <p style="margin-top: 8px;"><b>Returned:</b> when state is present</p>
+    </td>
+  </tr>
+  <tr>
+    <td valign="top">
+      <div class="ansibleOptionAnchor" id="return-name"></div>
+      <p style="display: inline;"><strong>name</strong></p>
+      <a class="ansibleOptionLink" href="#return-name" title="Permalink to this return value"></a>
+      <p style="font-size: small; margin-bottom: 0;">
+        <span style="color: purple;">string</span>
+      </p>
+    </td>
+    <td valign="top">
+      <p>The name of the team.</p>
+      <p style="margin-top: 8px;"><b>Returned:</b> always</p>
+    </td>
+  </tr>
+  </tbody>
+  </table>
 
 
 
@@ -266,7 +305,7 @@ Examples
 Authors
 ~~~~~~~
 
-- Tom Page (@Tompage1994)
+- Brian McLaughlin (@bmclaughlin)
 
 
 Collection links
