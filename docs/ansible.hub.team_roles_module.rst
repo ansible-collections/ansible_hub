@@ -1,7 +1,7 @@
 .. Created with antsibull-docs 2.24.0
 
-ansible.hub.ah_ee_registry_index module -- Initiate an execution environment registry indexing
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ansible.hub.team_roles module -- Assign roles to teams in private automation hub
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 This module is part of the `ansible.hub collection <https://galaxy.ansible.com/ui/repo/published/ansible/hub/>`_ (version 1.0.3).
 
@@ -10,7 +10,7 @@ To check whether it is installed, run ``ansible-galaxy collection list``.
 
 To install it, use: :code:`ansible\-galaxy collection install ansible.hub`.
 
-To use it in a playbook, specify: ``ansible.hub.ah_ee_registry_index``.
+To use it in a playbook, specify: ``ansible.hub.team_roles``.
 
 
 .. contents::
@@ -21,7 +21,10 @@ To use it in a playbook, specify: ``ansible.hub.ah_ee_registry_index``.
 Synopsis
 --------
 
-- Initiate an execution environment registry indexing.
+- Assign roles to existing teams in private automation hub.
+- Teams and roles must already exist.
+- Uses the Hub UI v2 API for role assignments.
+- Requires private automation hub version 4.11 or later.
 
 
 
@@ -38,13 +41,13 @@ Parameters
   <table style="width: 100%;">
   <thead>
     <tr>
-    <th><p>Parameter</p></th>
+    <th colspan="2"><p>Parameter</p></th>
     <th><p>Comments</p></th>
   </tr>
   </thead>
   <tbody>
   <tr>
-    <td valign="top">
+    <td colspan="2" valign="top">
       <div class="ansibleOptionAnchor" id="parameter-ah_host"></div>
       <div class="ansibleOptionAnchor" id="parameter-ah_hostname"></div>
       <div class="ansibleOptionAnchor" id="parameter-aap_hostname"></div>
@@ -62,7 +65,7 @@ Parameters
     </td>
   </tr>
   <tr>
-    <td valign="top">
+    <td colspan="2" valign="top">
       <div class="ansibleOptionAnchor" id="parameter-ah_password"></div>
       <div class="ansibleOptionAnchor" id="parameter-aap_password"></div>
       <p style="display: inline;"><strong>ah_password</strong></p>
@@ -78,7 +81,7 @@ Parameters
     </td>
   </tr>
   <tr>
-    <td valign="top">
+    <td colspan="2" valign="top">
       <div class="ansibleOptionAnchor" id="parameter-ah_path_prefix"></div>
       <p style="display: inline;"><strong>ah_path_prefix</strong></p>
       <a class="ansibleOptionLink" href="#parameter-ah_path_prefix" title="Permalink to this option"></a>
@@ -94,7 +97,7 @@ Parameters
     </td>
   </tr>
   <tr>
-    <td valign="top">
+    <td colspan="2" valign="top">
       <div class="ansibleOptionAnchor" id="parameter-ah_token"></div>
       <div class="ansibleOptionAnchor" id="parameter-aap_token"></div>
       <p style="display: inline;"><strong>ah_token</strong></p>
@@ -113,7 +116,7 @@ Parameters
     </td>
   </tr>
   <tr>
-    <td valign="top">
+    <td colspan="2" valign="top">
       <div class="ansibleOptionAnchor" id="parameter-ah_username"></div>
       <div class="ansibleOptionAnchor" id="parameter-aap_username"></div>
       <p style="display: inline;"><strong>ah_username</strong></p>
@@ -129,35 +132,7 @@ Parameters
     </td>
   </tr>
   <tr>
-    <td valign="top">
-      <div class="ansibleOptionAnchor" id="parameter-interval"></div>
-      <p style="display: inline;"><strong>interval</strong></p>
-      <a class="ansibleOptionLink" href="#parameter-interval" title="Permalink to this option"></a>
-      <p style="font-size: small; margin-bottom: 0;">
-        <span style="color: purple;">float</span>
-      </p>
-    </td>
-    <td valign="top">
-      <p>The interval to request an update from Automation Hub.</p>
-      <p style="margin-top: 8px;"><b style="color: blue;">Default:</b> <code style="color: blue;">1.0</code></p>
-    </td>
-  </tr>
-  <tr>
-    <td valign="top">
-      <div class="ansibleOptionAnchor" id="parameter-name"></div>
-      <p style="display: inline;"><strong>name</strong></p>
-      <a class="ansibleOptionLink" href="#parameter-name" title="Permalink to this option"></a>
-      <p style="font-size: small; margin-bottom: 0;">
-        <span style="color: purple;">string</span>
-        / <span style="color: red;">required</span>
-      </p>
-    </td>
-    <td valign="top">
-      <p>Registry name.</p>
-    </td>
-  </tr>
-  <tr>
-    <td valign="top">
+    <td colspan="2" valign="top">
       <div class="ansibleOptionAnchor" id="parameter-request_timeout"></div>
       <div class="ansibleOptionAnchor" id="parameter-aap_request_timeout"></div>
       <p style="display: inline;"><strong>request_timeout</strong></p>
@@ -174,20 +149,89 @@ Parameters
     </td>
   </tr>
   <tr>
-    <td valign="top">
-      <div class="ansibleOptionAnchor" id="parameter-timeout"></div>
-      <p style="display: inline;"><strong>timeout</strong></p>
-      <a class="ansibleOptionLink" href="#parameter-timeout" title="Permalink to this option"></a>
+    <td colspan="2" valign="top">
+      <div class="ansibleOptionAnchor" id="parameter-role"></div>
+      <p style="display: inline;"><strong>role</strong></p>
+      <a class="ansibleOptionLink" href="#parameter-role" title="Permalink to this option"></a>
       <p style="font-size: small; margin-bottom: 0;">
-        <span style="color: purple;">integer</span>
+        <span style="color: purple;">string</span>
+        / <span style="color: red;">required</span>
       </p>
     </td>
     <td valign="top">
-      <p>If waiting for the registry to index this will abort after this amount of seconds.</p>
+      <p>Role name to assign to the team (e.g., galaxy.collection_namespace_owner).</p>
+      <p>The role must already exist.</p>
     </td>
   </tr>
   <tr>
+    <td colspan="2" valign="top">
+      <div class="ansibleOptionAnchor" id="parameter-state"></div>
+      <p style="display: inline;"><strong>state</strong></p>
+      <a class="ansibleOptionLink" href="#parameter-state" title="Permalink to this option"></a>
+      <p style="font-size: small; margin-bottom: 0;">
+        <span style="color: purple;">string</span>
+      </p>
+    </td>
     <td valign="top">
+      <p>If <code class="ansible-value literal notranslate">present</code>, assigns the role to the team.</p>
+      <p>If <code class="ansible-value literal notranslate">absent</code>, removes the role from the team.</p>
+      <p style="margin-top: 8px;"><b">Choices:</b></p>
+      <ul>
+        <li><p><code style="color: blue;"><b>&#34;present&#34;</b></code> <span style="color: blue;">← (default)</span></p></li>
+        <li><p><code>&#34;absent&#34;</code></p></li>
+      </ul>
+
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2" valign="top">
+      <div class="ansibleOptionAnchor" id="parameter-targets"></div>
+      <p style="display: inline;"><strong>targets</strong></p>
+      <a class="ansibleOptionLink" href="#parameter-targets" title="Permalink to this option"></a>
+      <p style="font-size: small; margin-bottom: 0;">
+        <span style="color: purple;">dictionary</span>
+      </p>
+    </td>
+    <td valign="top">
+      <p>Resource targets to scope the role to.</p>
+      <p>Required for object-level roles.</p>
+      <p>When multiple namespaces are specified, a separate role assignment is created for each.</p>
+    </td>
+  </tr>
+  <tr>
+    <td></td>
+    <td valign="top">
+      <div class="ansibleOptionAnchor" id="parameter-targets/collection_namespaces"></div>
+      <p style="display: inline;"><strong>collection_namespaces</strong></p>
+      <a class="ansibleOptionLink" href="#parameter-targets/collection_namespaces" title="Permalink to this option"></a>
+      <p style="font-size: small; margin-bottom: 0;">
+        <span style="color: purple;">list</span>
+        / <span style="color: purple;">elements=string</span>
+      </p>
+    </td>
+    <td valign="top">
+      <p>List of collection namespaces to limit permissions to.</p>
+      <p>Each namespace will receive its own role assignment.</p>
+    </td>
+  </tr>
+
+  <tr>
+    <td colspan="2" valign="top">
+      <div class="ansibleOptionAnchor" id="parameter-team"></div>
+      <p style="display: inline;"><strong>team</strong></p>
+      <a class="ansibleOptionLink" href="#parameter-team" title="Permalink to this option"></a>
+      <p style="font-size: small; margin-bottom: 0;">
+        <span style="color: purple;">string</span>
+        / <span style="color: red;">required</span>
+      </p>
+    </td>
+    <td valign="top">
+      <p>Name of the team to assign roles to.</p>
+      <p>The team must already exist.</p>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2" valign="top">
       <div class="ansibleOptionAnchor" id="parameter-validate_certs"></div>
       <div class="ansibleOptionAnchor" id="parameter-ah_verify_ssl"></div>
       <div class="ansibleOptionAnchor" id="parameter-aap_validate_certs"></div>
@@ -211,23 +255,114 @@ Parameters
 
     </td>
   </tr>
+  </tbody>
+  </table>
+
+
+
+
+
+
+Examples
+--------
+
+.. code-block:: yaml
+
+    - name: Assign namespace-scoped role to a team
+      ansible.hub.team_roles:
+        team: my_team
+        role: galaxy.collection_namespace_owner
+        targets:
+          collection_namespaces:
+            - my_namespace
+        state: present
+        ah_host: hub.example.com
+        ah_username: admin
+        ah_password: Sup3r53cr3t
+
+    - name: Assign role to a team for multiple namespaces
+      ansible.hub.team_roles:
+        team: my_team
+        role: galaxy.collection_namespace_owner
+        targets:
+          collection_namespaces:
+            - namespace_one
+            - namespace_two
+        state: present
+        ah_host: hub.example.com
+        ah_username: admin
+        ah_password: Sup3r53cr3t
+
+    - name: Remove a role from a team
+      ansible.hub.team_roles:
+        team: my_team
+        role: galaxy.collection_namespace_owner
+        targets:
+          collection_namespaces:
+            - my_namespace
+        state: absent
+        ah_host: hub.example.com
+        ah_username: admin
+        ah_password: Sup3r53cr3t
+
+
+
+
+Return Values
+-------------
+The following are the fields unique to this module:
+
+.. raw:: html
+
+  <table style="width: 100%;">
+  <thead>
+    <tr>
+    <th><p>Key</p></th>
+    <th><p>Description</p></th>
+  </tr>
+  </thead>
+  <tbody>
   <tr>
     <td valign="top">
-      <div class="ansibleOptionAnchor" id="parameter-wait"></div>
-      <p style="display: inline;"><strong>wait</strong></p>
-      <a class="ansibleOptionLink" href="#parameter-wait" title="Permalink to this option"></a>
+      <div class="ansibleOptionAnchor" id="return-object_id"></div>
+      <p style="display: inline;"><strong>object_id</strong></p>
+      <a class="ansibleOptionLink" href="#return-object_id" title="Permalink to this return value"></a>
       <p style="font-size: small; margin-bottom: 0;">
-        <span style="color: purple;">boolean</span>
+        <span style="color: purple;">string</span>
       </p>
     </td>
     <td valign="top">
-      <p>Wait for the registry to finish indexing before returning.</p>
-      <p style="margin-top: 8px;"><b">Choices:</b></p>
-      <ul>
-        <li><p><code>false</code></p></li>
-        <li><p><code style="color: blue;"><b>true</b></code> <span style="color: blue;">← (default)</span></p></li>
-      </ul>
-
+      <p>The target object ID if a scoped role was used.</p>
+      <p>When multiple namespaces are specified, only the last processed object ID is returned.</p>
+      <p style="margin-top: 8px;"><b>Returned:</b> when targets are specified and a change was made</p>
+    </td>
+  </tr>
+  <tr>
+    <td valign="top">
+      <div class="ansibleOptionAnchor" id="return-role"></div>
+      <p style="display: inline;"><strong>role</strong></p>
+      <a class="ansibleOptionLink" href="#return-role" title="Permalink to this return value"></a>
+      <p style="font-size: small; margin-bottom: 0;">
+        <span style="color: purple;">string</span>
+      </p>
+    </td>
+    <td valign="top">
+      <p>The role that was assigned or removed.</p>
+      <p style="margin-top: 8px;"><b>Returned:</b> always</p>
+    </td>
+  </tr>
+  <tr>
+    <td valign="top">
+      <div class="ansibleOptionAnchor" id="return-team"></div>
+      <p style="display: inline;"><strong>team</strong></p>
+      <a class="ansibleOptionLink" href="#return-team" title="Permalink to this return value"></a>
+      <p style="font-size: small; margin-bottom: 0;">
+        <span style="color: purple;">string</span>
+      </p>
+    </td>
+    <td valign="top">
+      <p>The name of the team.</p>
+      <p style="margin-top: 8px;"><b>Returned:</b> always</p>
     </td>
   </tr>
   </tbody>
@@ -236,37 +371,10 @@ Parameters
 
 
 
-Notes
------
-
-- Only works when registry URL is registry.redhat.io
-
-
-Examples
---------
-
-.. code-block:: yaml
-
-    - name: Index redhat registry without waiting
-      ansible.hub.ah_ee_registry_index:
-        name: redhat
-        wait: false
-
-    - name: Index registry.redhat.io registry and wait up to 300 seconds
-      ansible.hub.ah_ee_registry_index:
-        name: registry_redhat_io
-        wait: true
-        timeout: 300
-
-
-
-
-
-
 Authors
 ~~~~~~~
 
-- Tom Page (@Tompage1994)
+- Brian McLaughlin (@bmclaughlin)
 
 
 Collection links

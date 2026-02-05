@@ -29,3 +29,5 @@ releases:
     fragments:
     - fix-error.msg.yml
     release_date: '2025-10-22'
+  1.0.4:
+    release_date: '2026-02-05'
