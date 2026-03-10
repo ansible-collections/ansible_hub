@@ -192,6 +192,9 @@ def main():
                 # up an EE, the API response already includes a
                 # reference to its parent namespace, so we save both
                 # for use when assigning roles below.
+                # Note: this fix applies to AAP 2.5 (galaxy_ng 4.10).
+                # On AAP 2.6+ (galaxy_ng 4.11+), use the team_roles
+                # module instead, which uses the correct API layer.
                 # See AAP-67927 for more robust alternatives.
                 if 'ee_namespace_urls' not in group_role_data['role_list'][index]:
                     group_role_data['role_list'][index]['ee_namespace_urls'] = {}
@@ -220,6 +223,7 @@ def main():
             ee_namespace_roles = {
                 'galaxy.execution_environment_collaborator',
                 'galaxy.execution_environment_publisher',
+                'galaxy.execution_environment_namespace_owner',
             }
             ee_namespace_urls = role_item.get('ee_namespace_urls', {})
             for role in role_item['roles']:
