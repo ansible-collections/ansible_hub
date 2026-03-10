@@ -186,7 +186,7 @@ def main():
                         module.fail_json(msg="Collection Repository `{0}` was not found".format(collection_repositories_item))
             if "execution_environments" in role_item['targets']:
                 repository_pulp = AHPulpEERepository(module)
-                # Quick-fix for AAP-60146 / AAP-67927: some EE roles
+                # Quick-fix for AAP-67927: some EE roles
                 # target the parent namespace that holds the EEs
                 # rather than the individual EE itself. When we look
                 # up an EE, the API response already includes a
@@ -211,7 +211,7 @@ def main():
                         group_role_data['role_list'][index]['content_urls'].append(registry.data['pulp_href'])
                     else:
                         module.fail_json(msg="Container Registry Remote `{0}` was not found".format(container_registery_remote_item))
-            # Quick-fix for AAP-60146 / AAP-67927: these EE roles need
+            # Quick-fix for AAP-67927: these EE roles need
             # to be assigned to the parent namespace that holds the
             # EEs, not the individual EE. If a role is in this set,
             # we swap to the namespace reference saved above. This
