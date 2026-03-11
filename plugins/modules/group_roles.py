@@ -186,10 +186,24 @@ def main():
                         module.fail_json(msg="Collection Repository `{0}` was not found".format(collection_repositories_item))
             if "execution_environments" in role_item['targets']:
                 repository_pulp = AHPulpEERepository(module)
+                # Quick-fix for AAP-67927: some EE roles
+                # target the parent namespace that holds the EEs
+                # rather than the individual EE itself. When we look
+                # up an EE, the API response already includes a
+                # reference to its parent namespace, so we save both
+                # for use when assigning roles below.
+                # Note: this fix applies to AAP 2.5 (galaxy_ng 4.10).
+                # On AAP 2.6+ (galaxy_ng 4.11+), use the team_roles
+                # module instead, which uses the correct API layer.
+                # See AAP-67927 for more robust alternatives.
+                if 'ee_namespace_urls' not in group_role_data['role_list'][index]:
+                    group_role_data['role_list'][index]['ee_namespace_urls'] = {}
                 for execution_environment_item in role_item['targets']['execution_environments']:
                     repository_pulp.get_object(execution_environment_item)
                     if repository_pulp.exists:
                         group_role_data['role_list'][index]['content_urls'].append(repository_pulp.data['pulp_href'])
+                        if 'namespace' in repository_pulp.data:
+                            group_role_data['role_list'][index]['ee_namespace_urls'][repository_pulp.data['pulp_href']] = repository_pulp.data['namespace']
                     else:
                         module.fail_json(msg="Execution Environment `{0}` was not found".format(execution_environment_item))
             if "container_registery_remotes" in role_item['targets']:
@@ -200,15 +214,31 @@ def main():
                         group_role_data['role_list'][index]['content_urls'].append(registry.data['pulp_href'])
                     else:
                         module.fail_json(msg="Container Registry Remote `{0}` was not found".format(container_registery_remote_item))
+            # Quick-fix for AAP-67927: these EE roles need
+            # to be assigned to the parent namespace that holds the
+            # EEs, not the individual EE. If a role is in this set,
+            # we swap to the namespace reference saved above. This
+            # hard-coded set should be replaced with a dynamic lookup
+            # if Hub adds more namespace-scoped EE roles in the future.
+            ee_namespace_roles = {
+                'galaxy.execution_environment_collaborator',
+                'galaxy.execution_environment_publisher',
+                'galaxy.execution_environment_namespace_owner',
+            }
+            ee_namespace_urls = role_item.get('ee_namespace_urls', {})
             for role in role_item['roles']:
                 role_pulp = AHPulpRolePerm(module)
                 role_pulp.get_object(role)
                 if role_pulp.exists:
                     for content_url in role_item['content_urls']:
+                        if role in ee_namespace_roles and content_url in ee_namespace_urls:
+                            resolved_url = ee_namespace_urls[content_url]
+                        else:
+                            resolved_url = content_url
                         group_role_data['perm_list'].append(
                             {
                                 "role": role_pulp.data['name'],
-                                "content_object": content_url
+                                "content_object": resolved_url
                             }
                         )
                 else:
