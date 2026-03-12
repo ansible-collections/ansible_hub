@@ -27,6 +27,9 @@ description:
       with the same parameters will create a new token.
     - If you are creating a temporary token for use with modules you should delete the token
       when you are done with it. See the example for how to do it.
+    - B(Deprecated) when used with AAP 2.5 or 2.6. This module will be removed in AAP 2.7.
+      In AAP 2.7, all authentication is handled through the AAP Gateway using JWT and personal
+      access tokens are no longer supported.
 options:
     state:
       description:
@@ -79,6 +82,64 @@ ah_token:
 from ..module_utils.ah_module import AHModule
 
 
+def check_deprecation(module):
+    """Check if this module is deprecated or unsupported based on Hub version.
+
+    Detects whether Hub is behind an AAP Gateway (resource server) and checks
+    the Hub version to determine if the ah_token module should warn or fail.
+    """
+    # Check if behind a resource server by hitting /api/
+    try:
+        response = module.session.open(
+            "GET",
+            module.build_url("/api/").geturl(),
+            validate_certs=module.verify_ssl,
+            timeout=module.request_timeout,
+            headers={"Content-Type": "application/json", "Accept": "application/json"},
+            follow_redirects=True,
+        )
+        from json import loads
+        data = loads(response.read())
+        if "apis" in data and "galaxy" in data["apis"]:
+            # Behind a resource server (AAP Gateway)
+            galaxy_prefix = data["apis"]["galaxy"].strip("/")
+            # Get server version
+            vers_response = module.session.open(
+                "GET",
+                module.url._replace(path="/{0}/".format(galaxy_prefix)).geturl(),
+                validate_certs=module.verify_ssl,
+                timeout=module.request_timeout,
+                headers={"Content-Type": "application/json", "Accept": "application/json"},
+                follow_redirects=True,
+            )
+            vers_data = loads(vers_response.read())
+            server_version = vers_data.get("server_version", "0").replace("dev", "")
+
+            from ansible.module_utils.compat.version import LooseVersion
+            vers = LooseVersion(server_version)
+
+            if vers >= LooseVersion("4.12"):
+                module.fail_json(
+                    msg=(
+                        "The ah_token module is not supported in AAP 2.7+ (Hub {vers}). "
+                        "In AAP 2.7, all authentication is handled through the AAP Gateway "
+                        "using JWT. Personal access tokens created by this module are not "
+                        "compatible with Gateway authentication. "
+                        "Use the AAP Gateway API for token management instead."
+                    ).format(vers=server_version)
+                )
+            elif vers >= LooseVersion("4.10"):
+                module.warn(
+                    "The ah_token module is deprecated when used with AAP 2.5+ (Hub {vers}) "
+                    "and will be removed in AAP 2.7. In AAP 2.7, all authentication will be "
+                    "handled through the AAP Gateway using JWT.".format(vers=server_version)
+                )
+    except Exception:
+        # If we can't determine the version, proceed without warning.
+        # This handles standalone Galaxy/Hub installations.
+        pass
+
+
 def return_token(module, last_response):
     # A token is special because you can never get the actual token ID back from the API.
     # So the default module return would give you an ID but then the token would forever be masked on you.
@@ -98,6 +159,9 @@ def main():
 
     # Create a module for ourselves
     module = AHModule(argument_spec=argument_spec)
+
+    # Check for deprecation/removal before proceeding
+    check_deprecation(module)
 
     # Extract our parameters
     state = module.params.get("state")

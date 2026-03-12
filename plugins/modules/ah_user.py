@@ -19,6 +19,8 @@ module: ah_user
 short_description: Manage private automation hub users
 description:
   - Create, delete, and update user accounts in private automation hub.
+  - B(Deprecated) when used with AAP 2.5 or 2.6. This module will be removed in AAP 2.7.
+    In AAP 2.7, user management is handled through the AAP Gateway.
 author:
   - Herve Quatremain (@herve4m)
 options:
@@ -185,10 +187,21 @@ def main():
     vers = module.get_server_version()
     user = AHUIUser(module)
 
-    if vers <= "4.10" and module.behind_resource_server:
-        module.fail_json(
-            msg=f"Module compatible with server version 4.10 or earlier, server version is {vers}"
-        )
+    if module.behind_resource_server:
+        if vers >= "4.12":
+            module.fail_json(
+                msg=(
+                    "The ah_user module is not supported in AAP 2.7+ (Hub {vers}). "
+                    "User management is handled through the AAP Gateway. "
+                    "Use the AAP Gateway API or UI to manage users instead."
+                ).format(vers=vers)
+            )
+        elif vers >= "4.10":
+            module.warn(
+                "The ah_user module is deprecated when used with AAP 2.5+ (Hub {vers}) "
+                "and will be removed in AAP 2.7. User management should be done through "
+                "the AAP Gateway.".format(vers=vers)
+            )
 
     # Get the user details from its name.
     # API (GET): /api/galaxy/_ui/v1/users/?username=<user_name>
