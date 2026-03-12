@@ -1,3 +1,0 @@
-bugfixes:
-  - Fixed group_roles module failing with HTTP 400 when assigning namespace-scoped
-    execution environment roles such as galaxy.execution_environment_collaborator.

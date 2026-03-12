@@ -4,6 +4,14 @@ ansible.hub Release Notes
 
 .. contents:: Topics
 
+v1.0.5
+======
+
+Bugfixes
+--------
+
+- Fixed group_roles module failing with HTTP 400 when assigning namespace-scoped execution environment roles such as galaxy.execution_environment_collaborator.
+
 v1.0.4
 ======
 

@@ -39,3 +39,11 @@ releases:
     fragments:
     - team_modules_added.yml
     release_date: '2026-02-05'
+  1.0.5:
+    changes:
+      bugfixes:
+      - Fixed group_roles module failing with HTTP 400 when assigning namespace-scoped
+        execution environment roles such as galaxy.execution_environment_collaborator.
+    fragments:
+    - fix-group-roles-ee-namespace.yml
+    release_date: '2026-03-12'
