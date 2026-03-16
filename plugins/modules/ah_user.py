@@ -187,20 +187,25 @@ def main():
     vers = module.get_server_version()
     user = AHUIUser(module)
 
+    # AHAPIModule.get_server_version() returns a LooseVersion object, so
+    # string comparisons like vers >= "4.12" work via LooseVersion.__ge__.
+    # This differs from ah_token.py which uses AHModule (no built-in version
+    # detection) and constructs LooseVersion explicitly.
     if module.behind_resource_server:
         if vers >= "4.12":
             module.fail_json(
                 msg=(
                     "The ah_user module is not supported in AAP 2.7+ (Hub {vers}). "
                     "User management is handled through the AAP Gateway. "
-                    "Use the AAP Gateway API or UI to manage users instead."
+                    "Use the ansible.platform collection or AAP Gateway UI to manage users instead."
                 ).format(vers=vers)
             )
         elif vers >= "4.10":
             module.warn(
                 "The ah_user module is deprecated when used with AAP 2.5+ (Hub {vers}) "
                 "and will be removed in AAP 2.7. User management should be done through "
-                "the AAP Gateway.".format(vers=vers)
+                "the AAP Gateway. Use the ansible.platform collection or AAP Gateway UI "
+                "to manage users instead.".format(vers=vers)
             )
 
     # Get the user details from its name.

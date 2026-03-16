@@ -79,6 +79,12 @@ ah_token:
   returned: on successful create
 """
 
+from json import loads
+
+from ansible.module_utils.compat.version import LooseVersion
+from ansible.module_utils.six.moves.urllib.error import HTTPError
+from ansible.module_utils.urls import ConnectionError
+
 from ..module_utils.ah_module import AHModule
 
 
@@ -87,6 +93,10 @@ def check_deprecation(module):
 
     Detects whether Hub is behind an AAP Gateway (resource server) and checks
     the Hub version to determine if the ah_token module should warn or fail.
+
+    Unlike AHAPIModule (used by ah_user), AHModule does not have built-in
+    resource server detection or get_server_version(), so we make lightweight
+    API calls to detect the environment.
     """
     # Check if behind a resource server by hitting /api/
     try:
@@ -98,46 +108,59 @@ def check_deprecation(module):
             headers={"Content-Type": "application/json", "Accept": "application/json"},
             follow_redirects=True,
         )
-        from json import loads
         data = loads(response.read())
-        if "apis" in data and "galaxy" in data["apis"]:
-            # Behind a resource server (AAP Gateway)
-            galaxy_prefix = data["apis"]["galaxy"].strip("/")
-            # Get server version
-            vers_response = module.session.open(
-                "GET",
-                module.url._replace(path="/{0}/".format(galaxy_prefix)).geturl(),
-                validate_certs=module.verify_ssl,
-                timeout=module.request_timeout,
-                headers={"Content-Type": "application/json", "Accept": "application/json"},
-                follow_redirects=True,
-            )
-            vers_data = loads(vers_response.read())
-            server_version = vers_data.get("server_version", "0").replace("dev", "")
+    except (HTTPError, ConnectionError) as e:
+        # Cannot reach /api/ — standalone install or network issue, proceed without warning
+        module.warn("Unable to detect AAP Gateway status: {0}".format(e))
+        return
+    except (ValueError, KeyError):
+        # Malformed JSON response — not a standard AAP/Galaxy endpoint
+        return
 
-            from ansible.module_utils.compat.version import LooseVersion
-            vers = LooseVersion(server_version)
+    if "apis" not in data or "galaxy" not in data.get("apis", {}):
+        # Not behind a resource server (standalone Galaxy/Hub), no action needed
+        return
 
-            if vers >= LooseVersion("4.12"):
-                module.fail_json(
-                    msg=(
-                        "The ah_token module is not supported in AAP 2.7+ (Hub {vers}). "
-                        "In AAP 2.7, all authentication is handled through the AAP Gateway "
-                        "using JWT. Personal access tokens created by this module are not "
-                        "compatible with Gateway authentication. "
-                        "Use the AAP Gateway API for token management instead."
-                    ).format(vers=server_version)
-                )
-            elif vers >= LooseVersion("4.10"):
-                module.warn(
-                    "The ah_token module is deprecated when used with AAP 2.5+ (Hub {vers}) "
-                    "and will be removed in AAP 2.7. In AAP 2.7, all authentication will be "
-                    "handled through the AAP Gateway using JWT.".format(vers=server_version)
-                )
-    except Exception:
-        # If we can't determine the version, proceed without warning.
-        # This handles standalone Galaxy/Hub installations.
-        pass
+    # Behind a resource server (AAP Gateway)
+    galaxy_prefix = data["apis"]["galaxy"].strip("/")
+    try:
+        vers_response = module.session.open(
+            "GET",
+            module.url._replace(path="/{0}/".format(galaxy_prefix)).geturl(),
+            validate_certs=module.verify_ssl,
+            timeout=module.request_timeout,
+            headers={"Content-Type": "application/json", "Accept": "application/json"},
+            follow_redirects=True,
+        )
+        vers_data = loads(vers_response.read())
+    except (HTTPError, ConnectionError) as e:
+        module.warn("Unable to determine Hub version: {0}".format(e))
+        return
+    except (ValueError, KeyError):
+        module.warn("Unable to parse Hub version response")
+        return
+
+    server_version = vers_data.get("server_version", "0").replace("dev", "")
+    vers = LooseVersion(server_version)
+
+    if vers >= LooseVersion("4.12"):
+        module.fail_json(
+            msg=(
+                "The ah_token module is not supported in AAP 2.7+ (Hub {vers}). "
+                "In AAP 2.7, all authentication is handled through the AAP Gateway "
+                "using JWT. Personal access tokens created by this module are not "
+                "compatible with Gateway authentication. "
+                "Use the ansible.platform collection for token management instead."
+            ).format(vers=server_version)
+        )
+    elif vers >= LooseVersion("4.10"):
+        module.warn(
+            "The ah_token module is deprecated when used with AAP 2.5+ (Hub {vers}) "
+            "and will be removed in AAP 2.7. In AAP 2.7, all authentication will be "
+            "handled through the AAP Gateway using JWT. "
+            "Use the ansible.platform collection for token management instead."
+            .format(vers=server_version)
+        )
 
 
 def return_token(module, last_response):
