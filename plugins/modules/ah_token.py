@@ -109,12 +109,9 @@ def check_deprecation(module):
             follow_redirects=True,
         )
         data = loads(response.read())
-    except (HTTPError, ConnectionError) as e:
-        # Cannot reach /api/ — standalone install or network issue, proceed without warning
-        module.warn("Unable to detect AAP Gateway status: {0}".format(e))
-        return
-    except (ValueError, KeyError):
-        # Malformed JSON response — not a standard AAP/Galaxy endpoint
+    except (HTTPError, ConnectionError, ValueError):
+        # HTTPError/ConnectionError: standalone install, endpoint doesn't exist, or network issue
+        # ValueError: malformed JSON response, not a standard AAP/Galaxy endpoint
         return
 
     if "apis" not in data or "galaxy" not in data.get("apis", {}):
