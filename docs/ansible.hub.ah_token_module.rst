@@ -3,7 +3,7 @@
 ansible.hub.ah_token module -- Create, update, or destroy Automation Hub tokens
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-This module is part of the `ansible.hub collection <https://galaxy.ansible.com/ui/repo/published/ansible/hub/>`_ (version 1.0.4).
+This module is part of the `ansible.hub collection <https://galaxy.ansible.com/ui/repo/published/ansible/hub/>`_ (version 1.0.6).
 
 It is not included in ``ansible-core``.
 To check whether it is installed, run ``ansible-galaxy collection list``.
@@ -26,6 +26,7 @@ Synopsis
 - Because of the sensitive nature of tokens, the created token value is only available once through the Ansible fact. (See RETURN for details).
 - Due to the nature of tokens in Automation Hub this module is not idempotent. A second will with the same parameters will create a new token.
 - If you are creating a temporary token for use with modules you should delete the token when you are done with it. See the example for how to do it.
+- :strong:`Deprecated` when used with AAP 2.5 or 2.6. This module will be removed in AAP 2.7. In AAP 2.7, all authentication is handled through the AAP Gateway using JWT and personal access tokens are no longer supported.
 
 
 

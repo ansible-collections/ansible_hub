@@ -47,3 +47,17 @@ releases:
     fragments:
     - fix-group-roles-ee-namespace.yml
     release_date: '2026-03-12'
+  1.0.6:
+    changes:
+      deprecated_features:
+      - ah_token - module now emits a deprecation warning when used with AAP 2.5 or
+        2.6 (Hub 4.10/4.11) and fails with a clear error on AAP 2.7+ (Hub 4.12+).
+        This module is not compatible with Gateway-only authentication in AAP 2.7.
+        Use the ansible.platform collection for token management instead.
+      - ah_user - module now emits a deprecation warning when used with AAP 2.5 or
+        2.6 (Hub 4.10/4.11) and fails with a clear error on AAP 2.7+ (Hub 4.12+).
+        This module is not compatible with Gateway-only user management in AAP 2.7.
+        Use the ansible.platform collection or AAP Gateway UI to manage users instead.
+    fragments:
+    - deprecate-ah-token-ah-user.yml
+    release_date: '2026-03-19'
