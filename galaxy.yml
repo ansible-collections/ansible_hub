@@ -21,15 +21,18 @@ repository: https://github.com/ansible-collections/ansible_hub
 homepage: https://github.com/ansible-collections/ansible_hub
 issues: https://github.com/ansible-collections/ansible_hub/issues
 build_ignore:
-  - .ansible/
+  - .ansible
   - .gitignore
-  - .github/
-  - changelogs/
-  - scripts/
+  - .github
+  - .vscode
+  - .yamllint.yml
+  - changelogs
+  - scripts
   - tools
   - setup.cfg
   - galaxy.yml.j2
   - template_galaxy.yml
   - '*.tar.gz'
+  - importer_result.json
   - test
   - galaxy_ng
