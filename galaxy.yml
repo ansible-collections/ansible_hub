@@ -33,5 +33,6 @@ build_ignore:
   - galaxy.yml.j2
   - template_galaxy.yml
   - '*.tar.gz'
+  - importer_result.json
   - test
   - galaxy_ng
