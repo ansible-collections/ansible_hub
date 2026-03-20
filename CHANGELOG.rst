@@ -4,6 +4,15 @@ ansible.hub Release Notes
 
 .. contents:: Topics
 
+v1.0.6
+======
+
+Deprecated Features
+-------------------
+
+- ah_token - module now emits a deprecation warning when used with AAP 2.5 or 2.6 (Hub 4.10/4.11) and fails with a clear error on AAP 2.7+ (Hub 4.12+). This module is not compatible with Gateway-only authentication in AAP 2.7. Use the ansible.platform collection for token management instead.
+- ah_user - module now emits a deprecation warning when used with AAP 2.5 or 2.6 (Hub 4.10/4.11) and fails with a clear error on AAP 2.7+ (Hub 4.12+). This module is not compatible with Gateway-only user management in AAP 2.7. Use the ansible.platform collection or AAP Gateway UI to manage users instead.
+
 v1.0.5
 ======
 

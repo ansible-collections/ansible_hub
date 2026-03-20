@@ -3,7 +3,7 @@
 ansible.hub.ah_user module -- Manage private automation hub users
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-This module is part of the `ansible.hub collection <https://galaxy.ansible.com/ui/repo/published/ansible/hub/>`_ (version 1.0.4).
+This module is part of the `ansible.hub collection <https://galaxy.ansible.com/ui/repo/published/ansible/hub/>`_ (version 1.0.6).
 
 It is not included in ``ansible-core``.
 To check whether it is installed, run ``ansible-galaxy collection list``.
@@ -22,6 +22,7 @@ Synopsis
 --------
 
 - Create, delete, and update user accounts in private automation hub.
+- :strong:`Deprecated` when used with AAP 2.5 or 2.6. This module will be removed in AAP 2.7. In AAP 2.7, user management is handled through the AAP Gateway.
 
 
 
