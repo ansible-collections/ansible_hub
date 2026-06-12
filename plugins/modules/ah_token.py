@@ -79,6 +79,8 @@ ah_token:
   returned: on successful create
 """
 
+import base64
+
 from json import loads
 
 from ansible.module_utils.compat.version import LooseVersion
@@ -98,6 +100,18 @@ def check_deprecation(module):
     resource server detection or get_server_version(), so we make lightweight
     API calls to detect the environment.
     """
+    # Build auth headers from module params so the version-check request is
+    # authenticated. Without this, galaxy_ng (PR #558+) strips server_version
+    # from the response and the version gates below are silently skipped.
+    headers = {"Content-Type": "application/json", "Accept": "application/json"}
+    if module.oauth_token:
+        headers["Authorization"] = "Token {0}".format(module.oauth_token)
+    elif module.username and module.password:
+        basic_str = base64.b64encode(
+            "{0}:{1}".format(module.username, module.password).encode("ascii")
+        )
+        headers["Authorization"] = "Basic {0}".format(basic_str.decode("ascii"))
+
     # Check if behind a resource server by hitting /api/
     try:
         response = module.session.open(
@@ -105,7 +119,7 @@ def check_deprecation(module):
             module.build_url("/api/").geturl(),
             validate_certs=module.verify_ssl,
             timeout=module.request_timeout,
-            headers={"Content-Type": "application/json", "Accept": "application/json"},
+            headers=headers,
             follow_redirects=True,
         )
         data = loads(response.read())
@@ -126,7 +140,7 @@ def check_deprecation(module):
             module.url._replace(path="/{0}/".format(galaxy_prefix)).geturl(),
             validate_certs=module.verify_ssl,
             timeout=module.request_timeout,
-            headers={"Content-Type": "application/json", "Accept": "application/json"},
+            headers=headers,
             follow_redirects=True,
         )
         vers_data = loads(vers_response.read())
