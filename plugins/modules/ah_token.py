@@ -101,8 +101,8 @@ def check_deprecation(module):
     API calls to detect the environment.
     """
     # Build auth headers from module params so the version-check request is
-    # authenticated. Without this, galaxy_ng (PR #558+) strips server_version
-    # from the response and the version gates below are silently skipped.
+    # authenticated. Without this, galaxy_ng strips server_version from
+    # unauthenticated responses and the version gates below are silently skipped.
     headers = {"Content-Type": "application/json", "Accept": "application/json"}
     if module.oauth_token:
         headers["Authorization"] = "Token {0}".format(module.oauth_token)
