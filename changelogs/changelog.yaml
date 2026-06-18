@@ -61,3 +61,12 @@ releases:
     fragments:
     - deprecate-ah-token-ah-user.yml
     release_date: '2026-03-19'
+  1.0.7:
+    changes:
+      bugfixes:
+      - ah_token - Send authentication headers in check_deprecation() version-check
+        requests so deprecation warnings and version gates work correctly when galaxy_ng
+        strips version fields from unauthenticated API root responses (https://redhat.atlassian.net/browse/AAP-68691).
+    fragments:
+    - fix-ah-token-auth-deprecation-check.yml
+    release_date: '2026-06-18'

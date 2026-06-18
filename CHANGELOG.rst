@@ -4,6 +4,14 @@ ansible.hub Release Notes
 
 .. contents:: Topics
 
+v1.0.7
+======
+
+Bugfixes
+--------
+
+- ah_token - Send authentication headers in check_deprecation() version-check requests so deprecation warnings and version gates work correctly when galaxy_ng strips version fields from unauthenticated API root responses (https://redhat.atlassian.net/browse/AAP-68691).
+
 v1.0.6
 ======
 
