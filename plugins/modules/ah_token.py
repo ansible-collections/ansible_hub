@@ -83,8 +83,9 @@ import base64
 
 from json import loads
 
+from urllib.error import HTTPError
+
 from ansible.module_utils.compat.version import LooseVersion
-from ansible.module_utils.six.moves.urllib.error import HTTPError
 from ansible.module_utils.urls import ConnectionError
 
 from ..module_utils.ah_module import AHModule
