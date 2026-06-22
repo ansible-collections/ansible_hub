@@ -6,12 +6,9 @@
 #
 # Ansible Automation Hub UI project at https://github.com/ansible/ansible-hub-ui
 
-from __future__ import absolute_import, division, print_function
 import time
 
 from .ah_api_module import AHAPIModuleError
-
-__metaclass__ = type
 
 
 class AHPulpObject(object):
