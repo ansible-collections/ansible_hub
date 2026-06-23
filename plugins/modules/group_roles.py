@@ -14,8 +14,7 @@ module: group_roles
 short_description: Add roles to private automation hub user groups
 description:
   - Add roles to private automation hub user groups.
-  - Requires AAP 2.3 or Galaxy 4.6 or Later for global roles.
-  - Requires AAP 2.4 or Galaxy 4.7 or Later for most targeted roles.
+  - Requires AAP 2.5 or later.
 author:
   - Sean Sullivan (@sean-m-sullivan)
 options:
