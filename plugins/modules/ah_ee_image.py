@@ -45,7 +45,7 @@ options:
     choices: [absent, present]
 notes:
   - Supports C(check_mode).
-  - Only works with private automation hub v4.3.2 or later.
+  - Requires AAP 2.5 or later.
 extends_documentation_fragment: ansible.hub.auth_ui
 """
 

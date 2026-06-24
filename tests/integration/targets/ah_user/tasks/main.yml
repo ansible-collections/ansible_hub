@@ -60,6 +60,15 @@
         - r_basic is failed
         - "'not supported' not in r_basic.msg | default('')"
 
+    - name: Fail on unexpected standalone error
+      assert:
+        that:
+          - r_basic is success
+        fail_msg: "Unexpected error on standalone: {{ r_basic.msg | default('unknown') }}"
+      when:
+        - not (ah_behind_gateway | default(false) | bool)
+        - r_basic is failed
+
   always:
     - name: Remove user (basic auth)
       ansible.hub.ah_user:

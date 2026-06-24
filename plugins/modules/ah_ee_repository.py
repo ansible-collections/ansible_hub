@@ -67,7 +67,7 @@ options:
     choices: [absent, present]
 notes:
   - Supports C(check_mode).
-  - Only works with private automation hub v4.3.2 or later for local repositories and v4.4.0 for remote repositories.
+  - Requires AAP 2.5 or later.
   - The module cannot be use to create repositories.
     Use C(podman push) for example to create repositories.
 extends_documentation_fragment: ansible.hub.auth_ui

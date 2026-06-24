@@ -60,6 +60,15 @@
         - ah_behind_gateway | default(false) | bool
         - r_token is failed
 
+    - name: Fail on unexpected standalone error
+      assert:
+        that:
+          - r_token is success
+        fail_msg: "Unexpected error on standalone: {{ r_token.msg | default('unknown') }}"
+      when:
+        - not (ah_behind_gateway | default(false) | bool)
+        - r_token is failed
+
   always:
     - name: Remove user (token auth)
       ansible.hub.ah_user:
