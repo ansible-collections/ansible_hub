@@ -59,6 +59,7 @@ EXAMPLES = r"""
 RETURN = r""" # """
 
 from ..module_utils.ah_api_module import AHAPIModule
+from ..module_utils.ah_ui_object import AHUIGroup
 from ..module_utils.ah_pulp_object import AHPulpGroups
 
 
@@ -78,8 +79,13 @@ def main():
     module.authenticate()
     vers = module.get_server_version()
 
-    group = AHPulpGroups(module)
-    group.get_object(name)
+    # Use Pulp with newer versions
+    if vers > "4.7.0":
+        group = AHPulpGroups(module)
+        group.get_object(name)
+    else:
+        group = AHUIGroup(module)
+        group.get_object(name, vers)
     # Removing the group
     if state == "absent":
         group.delete()

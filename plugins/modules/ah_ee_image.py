@@ -45,7 +45,7 @@ options:
     choices: [absent, present]
 notes:
   - Supports C(check_mode).
-  - Requires AAP 2.5 or later.
+  - Only works with private automation hub v4.3.2 or later.
 extends_documentation_fragment: ansible.hub.auth_ui
 """
 
@@ -117,7 +117,10 @@ def main():
     # Authenticate
     module.authenticate()
 
+    # Only recent versions support execution environment
     vers = module.get_server_version()
+    if vers < "4.3.2":
+        module.fail_json(msg="This module requires private automation hub version 4.3.2 or later. Your version is {vers}".format(vers=vers))
 
     # Process the object from the Pulp API (delete or create)
     repository_pulp = AHPulpEERepository(module)

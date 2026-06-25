@@ -67,7 +67,7 @@ options:
     choices: [absent, present]
 notes:
   - Supports C(check_mode).
-  - Requires AAP 2.5 or later.
+  - Only works with private automation hub v4.3.2 or later for local repositories and v4.4.0 for remote repositories.
   - The module cannot be use to create repositories.
     Use C(podman push) for example to create repositories.
 extends_documentation_fragment: ansible.hub.auth_ui
@@ -183,7 +183,14 @@ def main():
     # Authenticate
     module.authenticate()
 
+    # Only recent versions support execution environment
     vers = module.get_server_version()
+    if vers < "4.3.2":
+        module.fail_json(msg="This module requires private automation hub version 4.3.2 or later. Your version is {vers}".format(vers=vers))
+    elif vers < "4.4.0" and registry:
+        module.fail_json(
+            msg="This module requires private automation hub version 4.4.0 or later to create remote repositories. Your version is {vers}".format(vers=vers)
+        )
 
     # Process the object from the Pulp API (delete or create)
     repository_pulp = AHPulpEERepository(module)
@@ -227,11 +234,17 @@ def main():
             new_fields[field_name] = field_val
 
         remote = AHUIEERemote(module)
-        new_fields["registry"] = registry_obj.data['id']
-        remote.name_field = "id"
-        registry_obj.id_field = "id"
+        if vers > "4.7.0":
+            new_fields["registry"] = registry_obj.data['id']
+            remote.name_field = "id"
+            registry_obj.id_field = "id"
+        else:
+            new_fields["registry"] = registry_obj.id
         if repository_ui.exists:
-            remote.get_object(repository_ui.data["pulp"]["repository"]["remote"]["id"], vers)
+            if vers > "4.7.0":
+                remote.get_object(repository_ui.data["pulp"]["repository"]["remote"]["id"], vers)
+            else:
+                remote.get_object(repository_ui.data["pulp"]["repository"]["remote"]["pulp_id"], vers)
         new_fields["name"] = name
         remote_changed = remote.create_or_update(new_fields, auto_exit=False)
         changed = changed or remote_changed

@@ -1066,7 +1066,10 @@ class AHUIEERepository(AHUIObject):
         """
         query = {self.name_field: name, "limit": "1000"}
         self.vers = vers
-        url = self.api.build_plugin_url(self.endpoint, query_params=query)
+        if vers < "4.7":
+            url = self.api.build_ui_url(self.endpoint, query_params=query)
+        else:
+            url = self.api.build_plugin_url(self.endpoint, query_params=query)
 
         try:
             response = self.api.make_request("GET", url)
@@ -1151,7 +1154,10 @@ class AHUIEERepository(AHUIObject):
         :rtype: bool
         """
 
-        url = self.api.build_plugin_url("{endpoint}/_content/sync".format(endpoint=self.id_endpoint))
+        if self.vers < "4.7":
+            url = self.api.build_ui_url("{endpoint}/_content/sync".format(endpoint=self.id_endpoint))
+        else:
+            url = self.api.build_plugin_url("{endpoint}/_content/sync".format(endpoint=self.id_endpoint))
         try:
             response = self.api.make_request("POST", url, wait_for_task=False)
         except AHAPIModuleError as e:
@@ -1228,7 +1234,10 @@ class AHUIEERepository(AHUIObject):
         if not self.exists:
             return ""
 
-        url = self.api.build_plugin_url("{endpoint}/_content/readme".format(endpoint=self.id_endpoint))
+        if self.vers < "4.7":
+            url = self.api.build_ui_url("{endpoint}/_content/readme".format(endpoint=self.id_endpoint))
+        else:
+            url = self.api.build_plugin_url("{endpoint}/_content/readme".format(endpoint=self.id_endpoint))
         try:
             response = self.api.make_request("GET", url)
         except AHAPIModuleError as e:
@@ -1284,7 +1293,10 @@ class AHUIEERepository(AHUIObject):
                 self.api.exit_json(**json_output)
             return True
 
-        url = self.api.build_plugin_url("{endpoint}/_content/readme".format(endpoint=self.id_endpoint))
+        if self.vers < "4.7":
+            url = self.api.build_ui_url("{endpoint}/_content/readme".format(endpoint=self.id_endpoint))
+        else:
+            url = self.api.build_plugin_url("{endpoint}/_content/readme".format(endpoint=self.id_endpoint))
         try:
             response = self.api.make_request("PUT", url, data={"text": readme})
         except AHAPIModuleError as e:
@@ -1571,7 +1583,10 @@ class AHUIEEImage(AHUIObject):
         self.image_name = name
         self.tag = tag
         self.vers = vers
-        url = self.api.build_plugin_url(self.id_endpoint, query_params={"limit": 1000})
+        if vers < "4.7":
+            url = self.api.build_ui_url(self.id_endpoint, query_params={"limit": 1000})
+        else:
+            url = self.api.build_plugin_url(self.id_endpoint, query_params={"limit": 1000})
         try:
             response = self.api.make_request("GET", url)
         except AHAPIModuleError as e:
