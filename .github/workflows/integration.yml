@@ -29,7 +29,7 @@ jobs:
                     #   - stable-4.9
                     - master
         steps:
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@v4
               with:
                   ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
@@ -43,16 +43,16 @@ jobs:
                   collection_repo: https://github.com/ansible-collections/ansible_hub
 
             - name: "Checkout galaxy_ng"
-              uses: actions/checkout@v2
+              uses: actions/checkout@v4
               with:
                   repository: ansible/galaxy_ng
                   path: galaxy_ng
                   ref: ${{ matrix.galaxy_ng_version }}
 
             - name: Setup python
-              uses: actions/setup-python@v4
+              uses: actions/setup-python@v5
               with:
-                  python-version: "3.11"
+                  python-version: "3.12"
 
             - name: (Linux) Install docker compose
               run: |

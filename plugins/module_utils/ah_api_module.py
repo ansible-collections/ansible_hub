@@ -6,9 +6,6 @@
 #
 # Ansible Automation Hub UI project at https://github.com/ansible/ansible-hub-ui
 
-from __future__ import absolute_import, division, print_function
-
-__metaclass__ = type
 
 import base64
 import json
@@ -16,12 +13,12 @@ import os
 import socket
 import time
 
+from urllib.error import HTTPError
+from urllib.parse import urlencode, urlparse
+
 from ansible.module_utils._text import to_bytes, to_text
 from ansible.module_utils.basic import AnsibleModule, env_fallback
 from ansible.module_utils.compat.version import LooseVersion as Version
-from ansible.module_utils.six import string_types
-from ansible.module_utils.six.moves.urllib.error import HTTPError
-from ansible.module_utils.six.moves.urllib.parse import urlencode, urlparse
 from ansible.module_utils.urls import Request, SSLValidationError
 
 
@@ -153,7 +150,7 @@ class AHAPIModule(AnsibleModule):
                     self.oauth_token = self.params.get("ah_token")["token"]
                 else:
                     self.fail_json(msg="The provided dict in ah_token did not properly contain the token entry")
-            elif isinstance(token_param, string_types):
+            elif isinstance(token_param, str):
                 self.oauth_token = self.params.get("ah_token")
             else:
                 error_msg = "The provided ah_token type was not valid ({0}). Valid options are str or dict.".format(type(token_param).__name__)

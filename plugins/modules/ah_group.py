@@ -8,11 +8,6 @@
 # automation hub at https://hub.example.com/pulp/api/v3/docs/
 
 
-from __future__ import absolute_import, division, print_function
-
-__metaclass__ = type
-
-
 DOCUMENTATION = r"""
 ---
 module: ah_group
