@@ -4,6 +4,14 @@ ansible.hub Release Notes
 
 .. contents:: Topics
 
+v1.1.0
+======
+
+Minor Changes
+-------------
+
+- The minimum supported ansible-core version is now 2.16. ansible-core 2.15 is no longer supported (https://forum.ansible.com/t/red-hat-ansible-automation-platform-is-ending-support-for-ansible-core-2-15-and-python-3-11/45574).
+
 v1.0.7
 ======
 

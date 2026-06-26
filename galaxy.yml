@@ -1,7 +1,7 @@
 ---
 namespace: ansible
 name: hub
-version: 1.0.7
+version: 1.1.0
 readme: README.md
 authors:
   - Sean Sullivan (github.com/sean-m-sullivan)
