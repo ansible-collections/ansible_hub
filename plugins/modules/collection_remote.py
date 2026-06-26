@@ -14,7 +14,7 @@ author:
 short_description: Configure a collection remote repository
 description:
     - Configure an Automation Hub collection remote repository.
-    - Requires AAP 2.5 or later.
+    - Requires AAP 2.4 or Later
 options:
   name:
     description:
