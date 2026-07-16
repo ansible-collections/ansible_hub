@@ -106,7 +106,13 @@ from ..module_utils.ah_module import AHModule
 
 
 def extract_version_from_path(path):
-    return "-".join(pathlib.Path(path).name.split("-")[2:]).replace(".tar.gz", "")
+    parts = pathlib.Path(path).name.replace(".tar.gz", "").split("-")
+    if len(parts) < 3:
+        raise ValueError(
+            "Could not extract version from '{0}'; expected format: "
+            "<namespace>-<name>-<version>.tar.gz".format(path)
+        )
+    return "-".join(parts[2:])
 
 
 def main():
@@ -142,7 +148,7 @@ def main():
     state = module.params.get("state")
 
     # approval needs a version, if one is not defined find it from the filename.
-    if auto_approve and path:
+    if auto_approve and path and not version:
         version = extract_version_from_path(path)
 
     # Attempt to look up an existing item based on the provided data
