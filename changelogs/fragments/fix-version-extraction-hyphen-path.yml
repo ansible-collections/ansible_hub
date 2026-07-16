@@ -1,0 +1,2 @@
+bugfixes:
+  - ah_collection - Fix version extraction from collection tarball paths containing hyphens in directory components (https://github.com/ansible-collections/ansible_hub/issues/59).
