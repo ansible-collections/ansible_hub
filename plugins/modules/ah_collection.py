@@ -105,6 +105,10 @@ import pathlib
 from ..module_utils.ah_module import AHModule
 
 
+def extract_version_from_path(path):
+    return "-".join(pathlib.Path(path).name.split("-")[2:]).replace(".tar.gz", "")
+
+
 def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
@@ -139,7 +143,7 @@ def main():
 
     # approval needs a version, if one is not defined find it from the filename.
     if auto_approve and path:
-        version = "-".join(path.split("-")[2:]).replace('.tar.gz', '')
+        version = extract_version_from_path(path)
 
     # Attempt to look up an existing item based on the provided data
     collection_endpoint = "collections/{0}/{1}".format(namespace, name)
