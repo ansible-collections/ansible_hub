@@ -342,13 +342,22 @@ class AHAPIModule(AnsibleModule):
         try:
             response_body = response.read()
         except Exception as e:
-            if "non_field_errors" in response["json"]:
-                raise AHAPIModuleError("Errors occurred with request (HTTP 400). Errors: {errors}".format(errors=response["json"]["non_field_errors"]))
-            if "errors" in response["json"]:
-                def get_details(err):
-                    return err["detail"]
-                raise AHAPIModuleError("Errors occurred with request (HTTP 400). Details: {errors}".format(
-                    errors=", ".join(map(get_details, response["json"]["errors"]))))
+            # response is a plain dict here (see make_request_raw_reponse), not
+            # an HTTPResponse, so it may be missing any of these keys
+            # depending on how the server formatted its error. Check for each
+            # key before indexing into it, and fall back to showing whatever
+            # the server actually sent rather than a generic error that hides
+            # the real cause.
+            if "json" in response:
+                if "non_field_errors" in response["json"]:
+                    raise AHAPIModuleError("Errors occurred with request (HTTP 400). Errors: {errors}".format(errors=response["json"]["non_field_errors"]))
+                if "errors" in response["json"]:
+                    def get_details(err):
+                        return err["detail"]
+                    raise AHAPIModuleError("Errors occurred with request (HTTP 400). Details: {errors}".format(
+                        errors=", ".join(map(get_details, response["json"]["errors"]))))
+                raise AHAPIModuleError("Errors occurred with request (HTTP {code}). Errors: {errors}".format(
+                    code=response.get("status_code"), errors=response["json"]))
             if "text" in response:
                 raise AHAPIModuleError("Errors occurred with request (HTTP 400). Errors: {errors}".format(errors=response["text"]))
             raise AHAPIModuleError("Failed to read response body: {error}".format(error=e))
