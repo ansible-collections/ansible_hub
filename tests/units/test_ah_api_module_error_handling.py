@@ -55,3 +55,46 @@ def test_make_request_handles_text_only_error_body():
         api.make_request("PATCH", "https://hub.example.com/pulp/api/v3/thing/1/", data={"description": "x"})
 
     assert "plain text error" in str(exc_info.value)
+
+
+def test_make_request_reports_the_real_status_code_for_non_field_errors():
+    """The non_field_errors branch hardcoded "HTTP 400" regardless of the
+    response's actual status code. A 409 (or any non-400 error the server
+    returns through this same code path) should be reported as 409, not a
+    fabricated 400.
+    """
+    api = _make_api({"status_code": 409, "json": {"non_field_errors": ["conflict"]}})
+
+    with pytest.raises(AHAPIModuleError) as exc_info:
+        api.make_request("PATCH", "https://hub.example.com/pulp/api/v3/thing/1/", data={"description": "x"})
+
+    assert "409" in str(exc_info.value)
+    assert "400" not in str(exc_info.value)
+
+
+def test_make_request_reports_unknown_status_when_missing():
+    """response.get("status_code") with no default renders as the literal
+    string "None" when the key is absent, which reads like a bug in the
+    error message itself. "unknown" is clearer.
+    """
+    api = _make_api({"json": {"weird_shape": True}})
+
+    with pytest.raises(AHAPIModuleError) as exc_info:
+        api.make_request("PATCH", "https://hub.example.com/pulp/api/v3/thing/1/", data={"description": "x"})
+
+    assert "unknown" in str(exc_info.value)
+    assert "None" not in str(exc_info.value)
+
+
+def test_make_request_truncates_a_large_unrecognized_error_body():
+    """The unrecognized-shape fallback interpolates the raw server response
+    verbatim. Bound the size so an unusually large body doesn't flood the
+    job output.
+    """
+    huge_value = "x" * 5000
+    api = _make_api({"status_code": 400, "json": {"some_field": huge_value}})
+
+    with pytest.raises(AHAPIModuleError) as exc_info:
+        api.make_request("PATCH", "https://hub.example.com/pulp/api/v3/thing/1/", data={"description": "x"})
+
+    assert len(str(exc_info.value)) < 1000

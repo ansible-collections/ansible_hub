@@ -330,7 +330,15 @@ class AHAPIModule(AnsibleModule):
         :param kwargs: Additional parameter to pass to the API (headers, data
                        for PUT and POST requests, ...)
 
-        :raises AHAPIModuleError: The API request failed.
+        :raises AHAPIModuleError: The API request failed. For error shapes this
+                                  method doesn't specifically recognize, the
+                                  server's response body is included verbatim
+                                  in the exception message. If ``data`` here
+                                  contains a credential, its value MUST come
+                                  from a module option declared
+                                  ``no_log=True`` in ``argument_spec`` -
+                                  that's what keeps it out of the exception
+                                  message if the server ever echoes it back.
 
         :return: A dictionary with two entries: ``status_code`` provides the
                  API call returned code and ``json`` provides the returned data
@@ -348,18 +356,28 @@ class AHAPIModule(AnsibleModule):
             # key before indexing into it, and fall back to showing whatever
             # the server actually sent rather than a generic error that hides
             # the real cause.
+            status_code = response.get("status_code", "unknown")
             if "json" in response:
                 if "non_field_errors" in response["json"]:
-                    raise AHAPIModuleError("Errors occurred with request (HTTP 400). Errors: {errors}".format(errors=response["json"]["non_field_errors"]))
+                    raise AHAPIModuleError("Errors occurred with request (HTTP {code}). Errors: {errors}".format(
+                        code=status_code, errors=response["json"]["non_field_errors"]))
                 if "errors" in response["json"]:
                     def get_details(err):
                         return err["detail"]
-                    raise AHAPIModuleError("Errors occurred with request (HTTP 400). Details: {errors}".format(
-                        errors=", ".join(map(get_details, response["json"]["errors"]))))
+                    raise AHAPIModuleError("Errors occurred with request (HTTP {code}). Details: {errors}".format(
+                        code=status_code, errors=", ".join(map(get_details, response["json"]["errors"]))))
+                # response["json"] here is whatever the server sent verbatim, in
+                # a shape we don't specifically recognize. Truncated to keep an
+                # unusually large body out of the logs; any value that needs
+                # redacting (passwords, tokens) is scrubbed from this message
+                # by Ansible's own no_log handling as long as the module
+                # argument_spec marks that field no_log=True, same as it does
+                # for every other message this module can raise.
                 raise AHAPIModuleError("Errors occurred with request (HTTP {code}). Errors: {errors}".format(
-                    code=response.get("status_code"), errors=response["json"]))
+                    code=status_code, errors=str(response["json"])[:500]))
             if "text" in response:
-                raise AHAPIModuleError("Errors occurred with request (HTTP 400). Errors: {errors}".format(errors=response["text"]))
+                raise AHAPIModuleError("Errors occurred with request (HTTP {code}). Errors: {errors}".format(
+                    code=status_code, errors=response["text"]))
             raise AHAPIModuleError("Failed to read response body: {error}".format(error=e))
 
         response_json = {}
