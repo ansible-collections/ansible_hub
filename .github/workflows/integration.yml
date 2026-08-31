@@ -161,6 +161,10 @@ jobs:
               run: ansible-test integration -vvv --color yes ah_ee_repository
               working-directory: /home/runner/.ansible/collections/ansible_collections/ansible/hub
 
+            - name: Run integration test - ah_ee_repository_token
+              run: ansible-test integration -vvv --color yes ah_ee_repository_token
+              working-directory: /home/runner/.ansible/collections/ansible_collections/ansible/hub
+
             - name: Run integration test - ah_ee_repository_sync
               run: ansible-test integration -vvv --color yes ah_ee_repository_sync
               working-directory: /home/runner/.ansible/collections/ansible_collections/ansible/hub

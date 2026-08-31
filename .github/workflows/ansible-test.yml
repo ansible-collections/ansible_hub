@@ -42,6 +42,29 @@ jobs:
           target-python-version: ${{ matrix.python }}
           pull-request-change-detection: false
 
+  units:
+    name: Unit tests (Ⓐ${{ matrix.ansible }}) - ${{ matrix.python }}
+    strategy:
+      matrix:
+        ansible:
+          - stable-2.16
+          - stable-2.17
+          - stable-2.18
+          - stable-2.19
+        python:
+          - '3.10'
+          - '3.11'
+          - '3.12'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Perform unit testing
+        uses: ansible-community/ansible-test-gh-action@release/v1
+        with:
+          ansible-core-version: ${{ matrix.ansible }}
+          testing-type: units
+          target-python-version: ${{ matrix.python }}
+          pull-request-change-detection: false
+
   check:  # This job does nothing and is only used for the branch protection
     # or multi-stage CI jobs, like making sure that all tests pass before
     # a publishing job is started.
@@ -49,6 +72,7 @@ jobs:
 
     needs:
       - sanity
+      - units
 
     runs-on: ubuntu-latest
 
