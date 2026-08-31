@@ -22,7 +22,7 @@ for mock_module in [
 ]:
     sys.modules.setdefault(mock_module, MagicMock())
 
-_module_path = pathlib.Path(__file__).resolve().parents[2] / "plugins" / "modules" / "ah_collection.py"
+_module_path = pathlib.Path(__file__).resolve().parents[4] / "plugins" / "modules" / "ah_collection.py"
 spec = importlib.util.spec_from_file_location(
     "ah_collection", str(_module_path), submodule_search_locations=[]
 )
