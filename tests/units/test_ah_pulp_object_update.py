@@ -3,19 +3,9 @@ import pathlib
 import sys
 from unittest.mock import MagicMock
 
-# ah_pulp_object.py imports ah_api_module.py, which imports ansible-core
-# modules at the top level. ansible-core is not installed in the unit test
-# environment, so mock those modules before loading either file.
-for mock_module in [
-    "ansible",
-    "ansible.module_utils",
-    "ansible.module_utils._text",
-    "ansible.module_utils.basic",
-    "ansible.module_utils.compat",
-    "ansible.module_utils.compat.version",
-    "ansible.module_utils.urls",
-]:
-    sys.modules.setdefault(mock_module, MagicMock())
+# ansible-core stubbing (AnsibleModule stand-in, etc.) lives in conftest.py,
+# shared with test_ah_api_module_error_handling.py, and runs before this file
+# is collected.
 
 _module_utils_dir = pathlib.Path(__file__).resolve().parents[2] / "plugins" / "module_utils"
 

@@ -1,36 +1,12 @@
 import importlib.util
 import pathlib
-import sys
-import types
 from unittest.mock import MagicMock
 
 import pytest
 
-# AHAPIModule subclasses ansible.module_utils.basic.AnsibleModule.
-# ansible-core is not installed in the unit test environment, and a MagicMock
-# cannot stand in as a base class (subclassing a MagicMock instance silently
-# produces another MagicMock instead of a real class), so give it a real,
-# empty stand-in class instead of a MagicMock.
-_fake_basic = types.ModuleType("ansible.module_utils.basic")
-
-
-class _FakeAnsibleModule:
-    pass
-
-
-_fake_basic.AnsibleModule = _FakeAnsibleModule
-_fake_basic.env_fallback = lambda *args, **kwargs: None
-sys.modules["ansible.module_utils.basic"] = _fake_basic
-
-for mock_module in [
-    "ansible",
-    "ansible.module_utils",
-    "ansible.module_utils._text",
-    "ansible.module_utils.compat",
-    "ansible.module_utils.compat.version",
-    "ansible.module_utils.urls",
-]:
-    sys.modules.setdefault(mock_module, MagicMock())
+# ansible-core stubbing (AnsibleModule stand-in, etc.) lives in conftest.py,
+# shared with test_ah_pulp_object_update.py, and runs before this file is
+# collected.
 
 _module_path = pathlib.Path(__file__).resolve().parents[2] / "plugins" / "module_utils" / "ah_api_module.py"
 spec = importlib.util.spec_from_file_location("ah_api_module", str(_module_path))
