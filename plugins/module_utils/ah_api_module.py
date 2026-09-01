@@ -38,6 +38,29 @@ class AHAPIModuleError(Exception):
         return self.error_message
 
 
+def _raise_http_error(status_code, errors):
+    raise AHAPIModuleError("Errors occurred with request (HTTP {code}). Errors: {errors}".format(
+        code=status_code, errors=errors))
+
+
+def _truncate_error_body(json_body, max_value_len=200):
+    """Truncate per-field so no single value can be split across a boundary.
+
+    Truncating the stringified dict as a whole can split a credential value in
+    half, defeating Ansible's no_log substring matching. Per-field truncation
+    keeps each value intact (up to max_value_len) so no_log can still find and
+    redact it.
+    """
+    if isinstance(json_body, dict):
+        truncated = {k: str(v)[:max_value_len] + ("...(truncated)" if len(str(v)) > max_value_len else "")
+                     for k, v in json_body.items()}
+        return str(truncated)
+    body_str = str(json_body)
+    if len(body_str) > 500:
+        return body_str[:500] + "...(truncated)"
+    return body_str
+
+
 class AHAPIModule(AnsibleModule):
     """Ansible module for managing private automation hub servers."""
 
@@ -359,25 +382,17 @@ class AHAPIModule(AnsibleModule):
             status_code = response.get("status_code", "unknown")
             if "json" in response:
                 if "non_field_errors" in response["json"]:
-                    raise AHAPIModuleError("Errors occurred with request (HTTP {code}). Errors: {errors}".format(
-                        code=status_code, errors=response["json"]["non_field_errors"]))
+                    _raise_http_error(status_code, response["json"]["non_field_errors"])
                 if "errors" in response["json"]:
-                    def get_details(err):
-                        return err["detail"]
-                    raise AHAPIModuleError("Errors occurred with request (HTTP {code}). Details: {errors}".format(
-                        code=status_code, errors=", ".join(map(get_details, response["json"]["errors"]))))
-                # response["json"] here is whatever the server sent verbatim, in
-                # a shape we don't specifically recognize. Truncated to keep an
-                # unusually large body out of the logs; any value that needs
-                # redacting (passwords, tokens) is scrubbed from this message
-                # by Ansible's own no_log handling as long as the module
-                # argument_spec marks that field no_log=True, same as it does
-                # for every other message this module can raise.
-                raise AHAPIModuleError("Errors occurred with request (HTTP {code}). Errors: {errors}".format(
-                    code=status_code, errors=str(response["json"])[:500]))
+                    _raise_http_error(status_code, ", ".join(err["detail"] for err in response["json"]["errors"]))
+                # response["json"] here is whatever the server sent verbatim,
+                # in a shape we don't specifically recognize. Truncate
+                # per-field so no single value can be split across the
+                # boundary, which would defeat Ansible's no_log substring
+                # matching on credentials the module marked no_log=True.
+                _raise_http_error(status_code, _truncate_error_body(response["json"]))
             if "text" in response:
-                raise AHAPIModuleError("Errors occurred with request (HTTP {code}). Errors: {errors}".format(
-                    code=status_code, errors=response["text"]))
+                _raise_http_error(status_code, response["text"])
             raise AHAPIModuleError("Failed to read response body: {error}".format(error=e))
 
         response_json = {}

@@ -69,23 +69,28 @@ def _run_main(overrides):
     return repo_pulp
 
 
-def test_empty_description_is_sent_as_null_to_clear_it():
-    """The Pulp API rejects an explicit blank string for description
-    ("This field may not be blank."), so a user setting description: ""
-    to mean "clear it" must have that translated to null, which the API
-    does accept (AAP-90033).
+import pytest
+
+
+@pytest.mark.parametrize(
+    "input_desc, expected_sent",
+    [
+        ("", None),
+        ("a real description", "a real description"),
+    ],
+    ids=[
+        "empty_string_clears_to_null",
+        "real_text_sent_unchanged",
+    ],
+)
+def test_description_value_sent_to_api(input_desc, expected_sent):
+    """Empty string means "clear it" and must be translated to null, since
+    the API rejects blank strings. Real text passes through unchanged.
     """
-    repo_pulp = _run_main({"description": ""})
+    repo_pulp = _run_main({"description": input_desc})
 
     sent = repo_pulp.update.call_args[0][0]
-    assert sent["description"] is None
-
-
-def test_non_empty_description_is_sent_unchanged():
-    repo_pulp = _run_main({"description": "a real description"})
-
-    sent = repo_pulp.update.call_args[0][0]
-    assert sent["description"] == "a real description"
+    assert sent["description"] == expected_sent
 
 
 def test_omitted_description_does_not_call_update():

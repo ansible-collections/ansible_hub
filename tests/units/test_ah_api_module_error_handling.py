@@ -86,10 +86,11 @@ def test_make_request_reports_unknown_status_when_missing():
     assert "None" not in str(exc_info.value)
 
 
-def test_make_request_truncates_a_large_unrecognized_error_body():
-    """The unrecognized-shape fallback interpolates the raw server response
-    verbatim. Bound the size so an unusually large body doesn't flood the
-    job output.
+def test_make_request_truncates_per_field_and_marks_it():
+    """Per-field truncation keeps each value intact up to the limit so
+    Ansible's no_log substring matching can still find and redact it.
+    Truncating the whole stringified dict could split a credential value
+    in half, defeating no_log.
     """
     huge_value = "x" * 5000
     api = _make_api({"status_code": 400, "json": {"some_field": huge_value}})
@@ -97,4 +98,6 @@ def test_make_request_truncates_a_large_unrecognized_error_body():
     with pytest.raises(AHAPIModuleError) as exc_info:
         api.make_request("PATCH", "https://hub.example.com/pulp/api/v3/thing/1/", data={"description": "x"})
 
-    assert len(str(exc_info.value)) < 1000
+    msg = str(exc_info.value)
+    assert len(msg) < 1000
+    assert "...(truncated)" in msg
