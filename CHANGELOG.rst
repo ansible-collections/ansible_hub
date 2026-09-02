@@ -4,6 +4,18 @@ ansible.hub Release Notes
 
 .. contents:: Topics
 
+v1.1.1
+======
+
+Bugfixes
+--------
+
+- Prevent credentials marked ``no_log`` from appearing in unrecognized API error responses (https://redhat.atlassian.net/browse/AAP-90033).
+- Surface the real API error message when an HTTP error response body does not match one of the previously recognized shapes, instead of a generic and unhelpful error (https://redhat.atlassian.net/browse/AAP-90033).
+- ah_collection - Fix version extraction from collection tarball paths containing hyphens in directory components (https://github.com/ansible-collections/ansible_hub/issues/59).
+- ah_ee_repository - Fix ``Update error: Failed to read response body: 'dict' object has no attribute 'read'`` when updating an existing execution environment repository, by sending updates as a partial update (PATCH) instead of a full replace (PUT) (https://redhat.atlassian.net/browse/AAP-90033).
+- ah_ee_repository - Setting ``description`` to an empty string to clear it no longer fails with ``This field may not be blank.``; it is now sent to the API as a null value, which the server accepts (https://redhat.atlassian.net/browse/AAP-90033).
+
 v1.1.0
 ======
 
