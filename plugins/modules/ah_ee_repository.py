@@ -26,10 +26,8 @@ options:
   description:
     description:
       - Text that describes the repository.
-      - To remove an existing description, set this to an empty string
-        (V("")). Setting it to V(null), or leaving it out of the task
-        entirely, both mean "do not change the description" and will not
-        remove it.
+      - To remove an existing description, set this to V("").
+      - Setting it to V(null), or omitting it, leaves the description unchanged.
     type: str
   registry:
     description:
