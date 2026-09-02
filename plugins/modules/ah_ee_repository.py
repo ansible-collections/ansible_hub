@@ -26,6 +26,8 @@ options:
   description:
     description:
       - Text that describes the repository.
+      - To remove an existing description, set this to V("").
+      - Setting it to V(null), or omitting it, leaves the description unchanged.
     type: str
   registry:
     description:
@@ -273,7 +275,10 @@ def main():
         except Exception as e:
             module.fail_json(msg="Cannot read {file}: {error}".format(file=readme_file, error=e))
 
-    if description is not None and repository_pulp.update({"description": description, "base_path": name}, auto_exit=False):
+    # The API rejects an explicit blank string for description ("This field
+    # may not be blank."), but does accept null, so a user clearing the
+    # description with description: "" needs that translated to null here.
+    if description is not None and repository_pulp.update({"description": description or None, "base_path": name}, auto_exit=False):
         changed = True
 
     if readme is None:

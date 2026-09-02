@@ -18,6 +18,7 @@ from urllib.parse import urlencode, urlparse
 
 from ansible.module_utils._text import to_bytes, to_text
 from ansible.module_utils.basic import AnsibleModule, env_fallback
+from ansible.module_utils.common.parameters import remove_values
 from ansible.module_utils.compat.version import LooseVersion as Version
 from ansible.module_utils.urls import Request, SSLValidationError
 
@@ -36,6 +37,29 @@ class AHAPIModuleError(Exception):
     def __str__(self):
         """Return the error message."""
         return self.error_message
+
+
+def _raise_http_error(status_code, errors):
+    raise AHAPIModuleError("Errors occurred with request (HTTP {code}). Errors: {errors}".format(
+        code=status_code, errors=errors))
+
+
+def _truncate_error_body(json_body, max_value_len=200):
+    """Truncate per-field so no single value can be split across a boundary.
+
+    Truncating the stringified dict as a whole can split a credential value in
+    half, defeating Ansible's no_log substring matching. Per-field truncation
+    keeps each value intact (up to max_value_len) so no_log can still find and
+    redact it.
+    """
+    if isinstance(json_body, dict):
+        truncated = {k: str(v)[:max_value_len] + ("...(truncated)" if len(str(v)) > max_value_len else "")
+                     for k, v in json_body.items()}
+        return str(truncated)
+    body_str = str(json_body)
+    if len(body_str) > 500:
+        return body_str[:500] + "...(truncated)"
+    return body_str
 
 
 class AHAPIModule(AnsibleModule):
@@ -330,7 +354,15 @@ class AHAPIModule(AnsibleModule):
         :param kwargs: Additional parameter to pass to the API (headers, data
                        for PUT and POST requests, ...)
 
-        :raises AHAPIModuleError: The API request failed.
+        :raises AHAPIModuleError: The API request failed. For error shapes this
+                                  method doesn't specifically recognize, the
+                                  server's response body is included verbatim
+                                  in the exception message. If ``data`` here
+                                  contains a credential, its value MUST come
+                                  from a module option declared
+                                  ``no_log=True`` in ``argument_spec`` -
+                                  that's what keeps it out of the exception
+                                  message if the server ever echoes it back.
 
         :return: A dictionary with two entries: ``status_code`` provides the
                  API call returned code and ``json`` provides the returned data
@@ -342,15 +374,31 @@ class AHAPIModule(AnsibleModule):
         try:
             response_body = response.read()
         except Exception as e:
-            if "non_field_errors" in response["json"]:
-                raise AHAPIModuleError("Errors occurred with request (HTTP 400). Errors: {errors}".format(errors=response["json"]["non_field_errors"]))
-            if "errors" in response["json"]:
-                def get_details(err):
-                    return err["detail"]
-                raise AHAPIModuleError("Errors occurred with request (HTTP 400). Details: {errors}".format(
-                    errors=", ".join(map(get_details, response["json"]["errors"]))))
+            # response is a plain dict here (see make_request_raw_reponse), not
+            # an HTTPResponse, so it may be missing any of these keys
+            # depending on how the server formatted its error. Check for each
+            # key before indexing into it, and fall back to showing whatever
+            # the server actually sent rather than a generic error that hides
+            # the real cause.
+            status_code = response.get("status_code", "unknown")
+            if "json" in response:
+                json_body = response["json"]
+                if isinstance(json_body, dict):
+                    if "non_field_errors" in json_body:
+                        _raise_http_error(status_code, json_body["non_field_errors"])
+                    if "errors" in json_body:
+                        _raise_http_error(status_code, ", ".join(err["detail"] for err in json_body["errors"]))
+                # response["json"] here is whatever the server sent verbatim,
+                # in a shape we don't specifically recognize. Truncate
+                # only after Ansible removes no_log values. Truncating first
+                # can expose part of a long credential that no longer matches
+                # Ansible's complete-secret redaction value.
+                safe_json_body = remove_values(json_body, self.no_log_values)
+                _raise_http_error(status_code, _truncate_error_body(safe_json_body))
             if "text" in response:
-                raise AHAPIModuleError("Errors occurred with request (HTTP 400). Errors: {errors}".format(errors=response["text"]))
+                # Text error bodies can also echo request credentials.
+                safe_text_body = remove_values(response["text"], self.no_log_values)
+                _raise_http_error(status_code, safe_text_body)
             raise AHAPIModuleError("Failed to read response body: {error}".format(error=e))
 
         response_json = {}
