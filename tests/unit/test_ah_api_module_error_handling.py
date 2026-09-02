@@ -28,6 +28,7 @@ def _make_api(raw_response):
     """
     api = object.__new__(AHAPIModule)
     api.make_request_raw_reponse = MagicMock(return_value=raw_response)
+    api.no_log_values = set()
     return api
 
 
@@ -114,3 +115,19 @@ def test_make_request_truncates_per_field_and_marks_it():
     msg = str(exc_info.value)
     assert len(msg) < 1000
     assert "...(truncated)" in msg
+
+
+def test_make_request_redacts_long_secret_before_truncating_error_body():
+    """Redaction must happen before truncation so a long secret cannot leak a
+    prefix that Ansible's complete-secret matching would miss.
+    """
+    secret = "s" * 300
+    api = _make_api({"status_code": 400, "json": {"detail": "Token {0}".format(secret)}})
+    api.no_log_values = {secret}
+
+    with pytest.raises(AHAPIModuleError) as exc_info:
+        api.make_request("PATCH", "https://hub.example.com/pulp/api/v3/thing/1/", data={"description": "x"})
+
+    msg = str(exc_info.value)
+    assert secret[:200] not in msg
+    assert "********" in msg

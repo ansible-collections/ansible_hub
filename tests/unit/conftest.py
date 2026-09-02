@@ -21,10 +21,28 @@ _fake_basic.AnsibleModule = _FakeAnsibleModule
 _fake_basic.env_fallback = lambda *args, **kwargs: None
 sys.modules.setdefault("ansible.module_utils.basic", _fake_basic)
 
+
+def _remove_values(value, no_log_values):
+    """Minimal test double for Ansible's recursive no_log redaction."""
+    if isinstance(value, dict):
+        return {key: _remove_values(item, no_log_values) for key, item in value.items()}
+    if isinstance(value, list):
+        return [_remove_values(item, no_log_values) for item in value]
+    if isinstance(value, str):
+        for secret in no_log_values:
+            value = value.replace(secret, "********")
+    return value
+
+
+_fake_parameters = types.ModuleType("ansible.module_utils.common.parameters")
+_fake_parameters.remove_values = _remove_values
+sys.modules.setdefault("ansible.module_utils.common.parameters", _fake_parameters)
+
 for _mock_module in [
     "ansible",
     "ansible.module_utils",
     "ansible.module_utils._text",
+    "ansible.module_utils.common",
     "ansible.module_utils.compat",
     "ansible.module_utils.compat.version",
     "ansible.module_utils.urls",

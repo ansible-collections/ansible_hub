@@ -18,6 +18,7 @@ from urllib.parse import urlencode, urlparse
 
 from ansible.module_utils._text import to_bytes, to_text
 from ansible.module_utils.basic import AnsibleModule, env_fallback
+from ansible.module_utils.common.parameters import remove_values
 from ansible.module_utils.compat.version import LooseVersion as Version
 from ansible.module_utils.urls import Request, SSLValidationError
 
@@ -389,12 +390,15 @@ class AHAPIModule(AnsibleModule):
                         _raise_http_error(status_code, ", ".join(err["detail"] for err in json_body["errors"]))
                 # response["json"] here is whatever the server sent verbatim,
                 # in a shape we don't specifically recognize. Truncate
-                # per-field so no single value can be split across the
-                # boundary, which would defeat Ansible's no_log substring
-                # matching on credentials the module marked no_log=True.
-                _raise_http_error(status_code, _truncate_error_body(json_body))
+                # only after Ansible removes no_log values. Truncating first
+                # can expose part of a long credential that no longer matches
+                # Ansible's complete-secret redaction value.
+                safe_json_body = remove_values(json_body, self.no_log_values)
+                _raise_http_error(status_code, _truncate_error_body(safe_json_body))
             if "text" in response:
-                _raise_http_error(status_code, response["text"])
+                # Text error bodies can also echo request credentials.
+                safe_text_body = remove_values(response["text"], self.no_log_values)
+                _raise_http_error(status_code, safe_text_body)
             raise AHAPIModuleError("Failed to read response body: {error}".format(error=e))
 
         response_json = {}
