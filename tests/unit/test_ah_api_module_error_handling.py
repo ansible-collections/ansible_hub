@@ -57,6 +57,19 @@ def test_make_request_handles_text_only_error_body():
     assert "plain text error" in str(exc_info.value)
 
 
+def test_make_request_handles_null_json_error_body():
+    """A JSON null error body must use the fallback instead of crashing while
+    looking for dictionary-only error keys.
+    """
+    api = _make_api({"status_code": 400, "json": None})
+
+    with pytest.raises(AHAPIModuleError) as exc_info:
+        api.make_request("PATCH", "https://hub.example.com/pulp/api/v3/thing/1/", data={"description": "x"})
+
+    assert "HTTP 400" in str(exc_info.value)
+    assert "None" in str(exc_info.value)
+
+
 def test_make_request_reports_the_real_status_code_for_non_field_errors():
     """The non_field_errors branch hardcoded "HTTP 400" regardless of the
     response's actual status code. A 409 (or any non-400 error the server

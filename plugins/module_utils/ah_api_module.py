@@ -381,16 +381,18 @@ class AHAPIModule(AnsibleModule):
             # the real cause.
             status_code = response.get("status_code", "unknown")
             if "json" in response:
-                if "non_field_errors" in response["json"]:
-                    _raise_http_error(status_code, response["json"]["non_field_errors"])
-                if "errors" in response["json"]:
-                    _raise_http_error(status_code, ", ".join(err["detail"] for err in response["json"]["errors"]))
+                json_body = response["json"]
+                if isinstance(json_body, dict):
+                    if "non_field_errors" in json_body:
+                        _raise_http_error(status_code, json_body["non_field_errors"])
+                    if "errors" in json_body:
+                        _raise_http_error(status_code, ", ".join(err["detail"] for err in json_body["errors"]))
                 # response["json"] here is whatever the server sent verbatim,
                 # in a shape we don't specifically recognize. Truncate
                 # per-field so no single value can be split across the
                 # boundary, which would defeat Ansible's no_log substring
                 # matching on credentials the module marked no_log=True.
-                _raise_http_error(status_code, _truncate_error_body(response["json"]))
+                _raise_http_error(status_code, _truncate_error_body(json_body))
             if "text" in response:
                 _raise_http_error(status_code, response["text"])
             raise AHAPIModuleError("Failed to read response body: {error}".format(error=e))
