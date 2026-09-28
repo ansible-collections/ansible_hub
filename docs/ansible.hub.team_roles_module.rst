@@ -214,6 +214,22 @@ Parameters
       <p>Each namespace will receive its own role assignment.</p>
     </td>
   </tr>
+  <tr>
+    <td colspan="2" valign="top">
+      <div class="ansibleOptionAnchor" id="parameter-organization"></div>
+      <p style="display: inline;"><strong>organization</strong></p>
+      <a class="ansibleOptionLink" href="#parameter-organization" title="Permalink to this option"></a>
+      <p style="font-size: small; margin-bottom: 0;">
+        <span style="color: purple;">string</span>
+      </p>
+    </td>
+    <td valign="top">
+      <p>Name or ID of the organization containing the team.</p>
+      <p>Optional when the team name is unique.</p>
+      <p>Required when teams with the same name exist in multiple organizations.</p>
+      <p>The module fails if multiple matching teams are found without this parameter.</p>
+    </td>
+  </tr>
 
   <tr>
     <td colspan="2" valign="top">
@@ -270,6 +286,7 @@ Examples
 
     - name: Assign namespace-scoped role to a team
       ansible.hub.team_roles:
+        organization: my_org
         team: my_team
         role: galaxy.collection_namespace_owner
         targets:

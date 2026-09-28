@@ -24,6 +24,7 @@ Synopsis
 - Add roles to private automation hub user groups.
 - Requires AAP 2.3 or Galaxy 4.6 or Later for global roles.
 - Requires AAP 2.4 or Galaxy 4.7 or Later for most targeted roles.
+- Supported through private automation hub 4.10 (AAP 2.5). Use the ``ansible.hub.team_roles`` module with private automation hub 4.11 or later.
 
 
 
@@ -144,6 +145,22 @@ Parameters
     <td valign="top">
       <p>List of Group names that receive the permissions specified by the roles.</p>
       <p>If the group is not found, it will be created.</p>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="3" valign="top">
+      <div class="ansibleOptionAnchor" id="parameter-organization"></div>
+      <p style="display: inline;"><strong>organization</strong></p>
+      <a class="ansibleOptionLink" href="#parameter-organization" title="Permalink to this option"></a>
+      <p style="font-size: small; margin-bottom: 0;">
+        <span style="color: purple;">string</span>
+      </p>
+    </td>
+    <td valign="top">
+      <p>Organization name used to qualify team names in private automation hub.</p>
+      <p>When set, each unqualified group name is resolved as <code>organization::group_name</code>.</p>
+      <p>This parameter is supported only with private automation hub 4.10 in AAP 2.5.</p>
+      <p>Leave it unset to preserve the existing group behavior.</p>
     </td>
   </tr>
   <tr>
@@ -364,6 +381,7 @@ Examples
         groups:
           - santa
           - group1
+        organization: my_org
         role_list:
           - roles:
               - galaxy.group_admin

@@ -26,6 +26,13 @@ options:
       - The team must already exist.
     required: true
     type: str
+  organization:
+    description:
+      - Name or ID of the organization containing the team.
+      - Optional when the team name is unique.
+      - Required when teams with the same name exist in multiple organizations.
+    required: false
+    type: str
   role:
     description:
       - Role name to assign to the team (e.g., galaxy.collection_namespace_owner).
@@ -58,6 +65,7 @@ extends_documentation_fragment: ansible.hub.auth_ui
 EXAMPLES = """
 - name: Assign namespace-scoped role to a team
   ansible.hub.team_roles:
+    organization: my_org
     team: my_team
     role: galaxy.collection_namespace_owner
     targets:
@@ -114,9 +122,12 @@ object_id:
 from ..module_utils.ah_api_module import AHAPIModule, AHAPIModuleError
 
 
-def get_team_id(module, team_name):
-    """Look up team by name and return its ID."""
-    url = module.build_ui_v2_url("teams", query_params={"name": team_name})
+def get_team_id(module, team_name, organization=None):
+    """Look up a team by name and optional organization, then return its ID."""
+    query_params = {"name": team_name}
+    if organization is not None:
+        query_params["organization"] = organization
+    url = module.build_ui_v2_url("teams", query_params=query_params)
     try:
         response = module.make_request("GET", url)
     except AHAPIModuleError as e:
@@ -125,10 +136,57 @@ def get_team_id(module, team_name):
     if response["status_code"] != 200:
         module.fail_json(msg="Failed to look up team: {0}".format(response))
 
+    matching_teams = []
     results = response["json"].get("results", [])
     for team in results:
-        if team.get("name") == team_name:
-            return team.get("id")
+        if team.get("name") != team_name:
+            continue
+        if organization is None:
+            matching_teams.append(team)
+            continue
+
+        team_organization = team.get("organization")
+        if team_organization is None:
+            # The organization query already scopes the API response. Some
+            # server versions omit the organization field from team results.
+            matching_teams.append(team)
+        elif isinstance(team_organization, dict):
+            if str(organization) in (
+                str(team_organization.get("id")),
+                str(team_organization.get("name")),
+            ):
+                matching_teams.append(team)
+        elif str(team_organization) == str(organization):
+            matching_teams.append(team)
+
+    if len(matching_teams) > 1:
+        if organization is None:
+            module.fail_json(
+                msg=(
+                    "Multiple teams named `{0}` were found. Specify the "
+                    "`organization` parameter to select the intended team."
+                ).format(team_name)
+            )
+        else:
+            module.fail_json(
+                msg=(
+                    "Multiple teams named `{0}` matched organization `{1}`. "
+                    "The API response was ambiguous."
+                ).format(team_name, organization)
+            )
+        return None
+
+    if organization is not None and matching_teams and matching_teams[0].get("organization") is None:
+        module.fail_json(
+            msg=(
+                "Team `{0}` matched organization `{1}`, but the API response "
+                "did not include organization metadata, so the team could not be verified."
+            ).format(team_name, organization)
+        )
+        return None
+
+    if matching_teams:
+        return matching_teams[0].get("id")
 
     return None
 
@@ -249,6 +307,7 @@ def delete_assignment(module, assignment_id):
 def main():
     argument_spec = dict(
         team=dict(type='str', required=True),
+        organization=dict(type='str', required=False),
         role=dict(type='str', required=True),
         targets=dict(type='dict', default=None),
         state=dict(choices=["present", "absent"], default="present"),
@@ -266,14 +325,19 @@ def main():
 
     # Extract our parameters
     team_name = module.params.get("team")
+    organization = module.params.get("organization")
     role_name = module.params.get("role")
     targets = module.params.get("targets")
     state = module.params.get("state")
 
     # Look up the team
-    team_id = get_team_id(module, team_name)
+    team_id = get_team_id(module, team_name, organization)
     if team_id is None:
-        module.fail_json(msg="Team `{0}` was not found".format(team_name))
+        if organization is None:
+            module.fail_json(msg="Team `{0}` was not found".format(team_name))
+        module.fail_json(
+            msg="Team `{0}` was not found in organization `{1}`".format(team_name, organization)
+        )
 
     # Look up the role definition
     role_definition_id = get_role_definition_id(module, role_name)

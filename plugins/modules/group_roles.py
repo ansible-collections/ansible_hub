@@ -16,6 +16,8 @@ description:
   - Add roles to private automation hub user groups.
   - Requires AAP 2.3 or Galaxy 4.6 or Later for global roles.
   - Requires AAP 2.4 or Galaxy 4.7 or Later for most targeted roles.
+  - Supported through private automation hub 4.10 (AAP 2.5). Use the
+    M(ansible.hub.team_roles) module with private automation hub 4.11 or later.
 author:
   - Sean Sullivan (@sean-m-sullivan)
 options:
@@ -26,6 +28,15 @@ options:
     required: True
     type: list
     elements: str
+  organization:
+    description:
+      - Organization name used to qualify team names in private automation hub.
+      - When set, each unqualified group name is resolved as
+        C(organization::group_name).
+      - This parameter is supported only with private automation hub 4.10 in
+        AAP 2.5. Leave it unset to preserve the existing group behavior.
+    required: false
+    type: str
   role_list:
     description:
       - List of sets of roles and targets to apply to the groups.
@@ -95,6 +106,7 @@ EXAMPLES = """
     groups:
       - santa
       - group1
+    organization: my_org
     role_list:
       - roles:
           - galaxy.group_admin
@@ -128,9 +140,46 @@ from ..module_utils.ah_pulp_object import (
 )
 
 
+def qualify_group_names(module, group_list, organization):
+    """Qualify team names for the opt-in AAP 2.5 organization behavior."""
+    if organization is None:
+        return group_list
+    if not organization:
+        module.fail_json(msg="The organization parameter must not be empty.")
+
+    qualified_group_list = []
+    prefix = "{0}::".format(organization)
+    for group_item in group_list:
+        if "::" in group_item:
+            if not group_item.startswith(prefix):
+                module.fail_json(
+                    msg=(
+                        "Group `{0}` is already organization-qualified for a "
+                        "different organization; do not combine it with organization `{1}`."
+                    ).format(group_item, organization)
+                )
+                continue
+            qualified_group_list.append(group_item)
+        else:
+            qualified_group_list.append(prefix + group_item)
+    return qualified_group_list
+
+
+def validate_server_version(module, version):
+    """Reject group_roles on Hub versions that use the team role API."""
+    if version >= "4.11":
+        module.fail_json(
+            msg=(
+                "The group_roles module is supported through private automation hub 4.10 "
+                "(AAP 2.5). Use the team_roles module with private automation hub 4.11 or later."
+            )
+        )
+
+
 def main():
     argument_spec = dict(
         groups=dict(type='list', elements='str', required=True),
+        organization=dict(type='str', required=False),
         role_list=dict(type='list', elements='dict', required=True),
         state=dict(choices=["present", "enforced", "absent"], default="present"),
     )
@@ -140,6 +189,7 @@ def main():
     group_role_data = {}
     # Extract our parameters
     group_list = module.params.get("groups")
+    organization = module.params.get("organization")
     group_role_data['role_list'] = module.params.get("role_list")
     state = module.params.get("state")
     # Set role data defaults
@@ -147,6 +197,14 @@ def main():
     # Set Group object
     group = AHPulpGroups(module)
     vers = module.get_server_version()
+    validate_server_version(module, vers)
+
+    if organization is not None:
+        if vers < "4.10":
+            module.fail_json(
+                msg="The organization parameter is supported only with private automation hub 4.10 (AAP 2.5)."
+            )
+        group_list = qualify_group_names(module, group_list, organization)
 
     for index, role_item in enumerate(group_role_data['role_list']):
         group_role_data['role_list'][index]['content_urls'] = []
