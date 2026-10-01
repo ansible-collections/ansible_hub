@@ -4,6 +4,16 @@ ansible.hub Release Notes
 
 .. contents:: Topics
 
+v1.1.2
+======
+
+Bugfixes
+--------
+
+- group_roles - Add an opt-in organization parameter for qualifying AAP 2.5 team names while preserving legacy group behavior on supported Hub versions when organization is omitted (https://redhat.atlassian.net/browse/AAP-42096).
+- group_roles - Reject Hub 4.11 and later, where team_roles is the supported role-assignment module (https://redhat.atlassian.net/browse/AAP-42096).
+- team_roles - Add organization-aware team lookup and fail instead of selecting an arbitrary team when names are ambiguous (https://redhat.atlassian.net/browse/AAP-42096).
+
 v1.1.1
 ======
 
