@@ -16,7 +16,8 @@ description:
   - Assign roles to existing teams in private automation hub.
   - Teams and roles must already exist.
   - Uses the Hub UI v2 API for role assignments.
-  - Requires private automation hub version 4.11 or later.
+  - Requires private automation hub version 4.10 or later for Gateway-managed teams.
+  - On Hub 4.10 (AAP 2.5), C(organization) is required. Standalone Hub 4.10 deployments should use C(group_roles).
 author:
   - Brian McLaughlin (@bmclaughlin)
 options:
@@ -29,7 +30,8 @@ options:
   organization:
     description:
       - Name or ID of the organization containing the team.
-      - Optional when the team name is unique.
+      - Required on Hub 4.10 for Gateway-managed teams.
+      - Optional on Hub 4.11 or later when the team name is unique.
       - Required when teams with the same name exist in multiple organizations.
     required: false
     type: str
@@ -118,6 +120,8 @@ object_id:
   type: str
   returned: when targets are specified and a change was made
 """
+
+from ansible.module_utils.compat.version import LooseVersion
 
 from ..module_utils.ah_api_module import AHAPIModule, AHAPIModuleError
 
@@ -304,6 +308,26 @@ def delete_assignment(module, assignment_id):
     return True
 
 
+def validate_server_version(module, version, organization):
+    """Validate support for team role assignments on this Hub version."""
+    hub_version = LooseVersion(str(version))
+    if hub_version < LooseVersion("4.10"):
+        module.fail_json(
+            msg=(
+                "This module requires private automation hub version 4.10 or later. "
+                "Your version is {vers}".format(vers=version)
+            )
+        )
+        return
+    if hub_version < LooseVersion("4.11") and not organization:
+        module.fail_json(
+            msg=(
+                "Hub 4.10 team_roles requires the organization parameter for "
+                "Gateway-managed teams. Use group_roles for standalone Hub 4.10."
+            )
+        )
+
+
 def main():
     argument_spec = dict(
         team=dict(type='str', required=True),
@@ -316,16 +340,12 @@ def main():
     # Create a module for ourselves
     module = AHAPIModule(argument_spec=argument_spec, supports_check_mode=True)
 
-    # Check server version - this module requires 4.11 or later
     vers = module.get_server_version()
-    if vers < "4.11":
-        module.fail_json(
-            msg="This module requires private automation hub version 4.11 or later. Your version is {vers}".format(vers=vers)
-        )
-
-    # Extract our parameters
     team_name = module.params.get("team")
     organization = module.params.get("organization")
+    validate_server_version(module, vers, organization)
+
+    # Extract our parameters
     role_name = module.params.get("role")
     targets = module.params.get("targets")
     state = module.params.get("state")

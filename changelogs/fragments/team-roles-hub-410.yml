@@ -1,0 +1,3 @@
+minor_changes:
+  - team_roles - Support Gateway-managed teams on Hub 4.10 (AAP 2.5), requiring the organization parameter. Standalone Hub 4.10 deployments should continue using group_roles.
+  - group_roles - Clarify that group_roles manages standalone Hub Pulp-local groups, while team_roles is for Gateway-managed AAP teams.

@@ -24,7 +24,9 @@ Synopsis
 - Add roles to private automation hub user groups.
 - Requires AAP 2.3 or Galaxy 4.6 or Later for global roles.
 - Requires AAP 2.4 or Galaxy 4.7 or Later for most targeted roles.
-- Supported through private automation hub 4.10 (AAP 2.5). Use the ``ansible.hub.team_roles`` module with private automation hub 4.11 or later.
+- Use this module for standalone Hub Pulp-local groups through version 4.10.
+- Use ``ansible.hub.team_roles`` for Gateway-managed AAP teams on Hub 4.10 or later.
+- This module is not supported with Hub 4.11 or later.
 
 
 
@@ -157,10 +159,9 @@ Parameters
       </p>
     </td>
     <td valign="top">
-      <p>Organization name used to qualify team names in private automation hub.</p>
+      <p>Organization name used to qualify a local Pulp group name.</p>
       <p>When set, each unqualified group name is resolved as <code>organization::group_name</code>.</p>
-      <p>This parameter is supported only with private automation hub 4.10 in AAP 2.5.</p>
-      <p>Leave it unset to preserve the existing group behavior.</p>
+      <p>Use <code>ansible.hub.team_roles</code> for Gateway-managed AAP teams.</p>
     </td>
   </tr>
   <tr>

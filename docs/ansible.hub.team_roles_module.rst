@@ -24,7 +24,8 @@ Synopsis
 - Assign roles to existing teams in private automation hub.
 - Teams and roles must already exist.
 - Uses the Hub UI v2 API for role assignments.
-- Requires private automation hub version 4.11 or later.
+- Requires private automation hub version 4.10 or later for Gateway-managed teams.
+- On Hub 4.10 (AAP 2.5), ``organization`` is required. Standalone Hub 4.10 deployments should use ``group_roles``.
 
 
 
@@ -225,7 +226,8 @@ Parameters
     </td>
     <td valign="top">
       <p>Name or ID of the organization containing the team.</p>
-      <p>Optional when the team name is unique.</p>
+      <p>Required on Hub 4.10 for Gateway-managed teams.</p>
+      <p>Optional on Hub 4.11 or later when the team name is unique.</p>
       <p>Required when teams with the same name exist in multiple organizations.</p>
       <p>The module fails if multiple matching teams are found without this parameter.</p>
     </td>

@@ -61,6 +61,7 @@ def test_group_roles_rejects_hub_4_11_and_later():
     module.fail_json.assert_called_once_with(
         msg=(
             "The group_roles module is supported through private automation hub 4.10 "
-            "(AAP 2.5). Use the team_roles module with private automation hub 4.11 or later."
+            "for standalone Hub deployments. Use team_roles for Gateway-managed AAP teams "
+            "on Hub 4.10 or later."
         )
     )
